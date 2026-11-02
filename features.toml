@@ -1,0 +1,44 @@
+# Feature map for this repository. See skills/feature-map/SKILL.md.
+
+[settings]
+mapped_paths = ["playbook/**", "templates/**", "skills/**", "testing/harness/harness/**"]
+ignore = ["templates/examples/**"]
+test_paths = ["skills/feature-map/scripts/test_*.py", "tools/*.py"]
+
+[[feature]]
+id = "guide"
+owner = "DababonPro"
+must_stay_true = [
+    "Every relative link in the Markdown files resolves",
+    "The guide says it is not legal advice and is no compliance claim",
+]
+code = ["playbook/**", "README.md", "tools/check_links.py"]
+proof = ["python tools/check_links.py", "python tools/check_agent_files.py"]
+
+[[feature]]
+id = "agent-files"
+owner = "DababonPro"
+must_stay_true = [
+    "The agent rules keep the approval, silence and session check rules",
+    "Every skill has a name and description",
+]
+code = ["templates/**", "skills/preview-then-execute/**", "skills/verify-the-result/**", "skills/session-handover/**", "tools/check_agent_files.py"]
+proof = ["python tools/check_agent_files.py"]
+
+[[feature]]
+id = "feature-map-check"
+owner = "DababonPro"
+must_stay_true = [
+    "A file that belongs to no feature fails the check",
+    "A deleted or skipped test fails the check",
+    "A weakened map fails the check and its proofs do not run",
+]
+code = ["skills/feature-map/**"]
+proof = ["python -m unittest discover -s skills/feature-map/scripts -p \"test_*.py\""]
+
+[[feature]]
+id = "harness"
+owner = "DababonPro"
+must_stay_true = ["The harness loads its scenarios and finds the templates and skills"]
+code = ["testing/harness/harness/**", "tools/check_harness.py"]
+proof = ["python tools/check_harness.py"]

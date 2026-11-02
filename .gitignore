@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.private-terms
+.env.local
+testing/harness/results/
+testing/harness/holdout/

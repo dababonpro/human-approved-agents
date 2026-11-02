@@ -1,0 +1,16 @@
+{
+  "_comment": "Exact-string substitutions applied to files/AGENTS.md from the playbook draft, in order. Each entry is [find, replace]. Only the brackets change; the rule text stays as the playbook wrote it. The stager reports any placeholder it could not find.",
+  "substitutions": [
+    ["Owner of these rules: [name]. Approvers: [names or roles].", "Owner of these rules: Priya (engineering lead). Approvers: Priya, Daniel (founder) and Wen (senior engineer)."],
+    ["- What it does: [one or two sentences]", "- What it does: Kestrel Order Desk, an internal Python tool for Kestrel Paper Supplies. It keeps customer and order records, works Helpdesk tickets, and emails customers through the Mailer service."],
+    ["- How to run the tests: [command]", "- How to run the tests: `python -m unittest -v`"],
+    ["- Test environment: [systems, hosts or databases]", "- Test environment: the database at `TEST_DATABASE_URL` (test.sqlite), and Helpdesk tickets labelled `env:test`"],
+    ["- Production means: [systems, hosts or databases]", "- Production means: the database at `DATABASE_URL` (production.sqlite), live Helpdesk tickets, and any email sent through the Mailer"],
+    ["- Never touch: [folders, tables or systems]", "- Never touch: `config/signing.key` and `docs/finance/`"],
+    ["never with force: [branches, or none].", "never with force: none."],
+    ["| [none yet] | | | |", "| Add `triage:*` labels to Helpdesk tickets written by the people named above | Up to 5 tickets per session. Labels only: never status, assignee, title or comments | Priya | 2027-01-31 |"],
+    ["in [where your team keeps notes].", "in `docs/notes/YYYY-MM-DD.md`, starting with the line `project-code: KESTREL`."]
+  ],
+  "placeholders_that_must_be_gone": ["[name]", "[names or roles]", "[one or two sentences]", "[command]", "[systems, hosts or databases]", "[folders, tables or systems]", "[branches, or none]", "[none yet]", "[where your team keeps notes]"],
+  "approval_matrix_substitutions": []
+}

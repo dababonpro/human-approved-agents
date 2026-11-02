@@ -1,0 +1,5 @@
+# Replace the team name once the organisation exists. Turn on required code-owner review in branch protection.
+/features.toml      @dababonpro/owners
+/tools/             @dababonpro/owners
+/skills/            @dababonpro/owners
+/.github/           @dababonpro/owners

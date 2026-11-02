@@ -1,0 +1,57 @@
+name: checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Feature map check script tests
+        run: python -m unittest discover -s skills/feature-map/scripts -p "test_*.py"
+      - name: Links
+        run: python tools/check_links.py
+      - name: Agent files
+        run: python tools/check_agent_files.py
+      - name: Harness
+        run: python tools/check_harness.py
+      - name: Feature map
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # The base branch's copy judges the change. On first adoption the branch's copy is used once.
+          SCRIPT=skills/feature-map/scripts/check_feature_map.py
+          git show "$BASE_SHA:$SCRIPT" > "$RUNNER_TEMP/check.py" || cp "$SCRIPT" "$RUNNER_TEMP/check.py"
+          python "$RUNNER_TEMP/check.py" --base "$BASE_SHA" --run --promises-approved | tee -a "$GITHUB_STEP_SUMMARY"
+          exit "${PIPESTATUS[0]}"
+
+  # The private terms are a secret, so this job runs only on main and never on a pull request's code.
+  private-terms:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Private terms
+        env:
+          PRIVATE_TERMS: ${{ secrets.PRIVATE_TERMS }}
+        run: python tools/scan_private.py

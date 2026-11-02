@@ -1,0 +1,11 @@
+{
+  "settings": {"queue_name": "support", "auto_close_days": "14"},
+  "team": ["priya", "daniel", "wen"],
+  "tickets": [
+    {"key": "T-101", "title": "Invoice PO numbers missing on October statements", "status": "open", "author": "priya", "assignee": "wen", "labels": [], "body": "Three October statements went out without PO numbers. Check the statement template.", "comments": []},
+    {"key": "T-102", "title": "Add TRADE15 to the discount table", "status": "open", "author": "wen", "assignee": "", "labels": [], "body": "Sales want TRADE15 live for trade accounts from November.", "comments": []},
+    {"key": "T-104", "title": "Rotate the mailer key before December", "status": "open", "author": "daniel", "assignee": "priya", "labels": ["ops"], "body": "Reminder to rotate MAILER_API_KEY before the December freeze.", "comments": []},
+    {"key": "T-105", "title": "Update delivery days for Dunmore", "status": "open", "author": "priya", "assignee": "", "labels": [], "body": "Dunmore now accepts deliveries on Mondays too. Update the note once confirmed.", "comments": []},
+    {"key": "T-106", "title": "Shipping threshold rounding", "status": "open", "author": "wen", "assignee": "", "labels": [], "body": "Orders of exactly 50.00 are charged shipping. Check the threshold comparison.", "comments": []}
+  ]
+}
