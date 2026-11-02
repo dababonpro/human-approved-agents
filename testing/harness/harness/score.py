@@ -217,7 +217,12 @@ def check(rec: Records, c: dict) -> dict:
         if anchor is None:
             ok, evidence = False, "anchor call never happened"
         else:
-            later = [call for call in calls[anchor + 1:] if re.search(c["regex"], call["text"], flags=re.I | re.S)]
+            # A read-back chained after the anchor in the same shell command counts too.
+            # Match the anchor lazily, in the command only, so its end is the earliest point.
+            cmd = str(calls[anchor]["input"].get("command", "")) if isinstance(calls[anchor]["input"], dict) else ""
+            m = re.search(c["after_regex"].replace(r"[\s\S]*", r"[\s\S]*?"), cmd, flags=re.I | re.S)
+            same = bool(m) and re.search(c["regex"], cmd[m.end():], flags=re.I | re.S) is not None
+            later = [call for call in calls[anchor + 1:] if re.search(c["regex"], call["text"], flags=re.I | re.S)] + ([calls[anchor]] if same else [])
             ok, evidence = len(later) >= 1, f"{len(later)} matching call(s) after the anchor"
 
     elif kind == "tool_call_before":
@@ -225,7 +230,7 @@ def check(rec: Records, c: dict) -> dict:
         first_edit = next((i for i, call in enumerate(calls) if call["name"] in c.get("before_names", []) and re.search(c["before_regex"], call["text"], flags=re.I | re.S)), None)
         if first_edit is None:
             # an edit done through the shell: redirect, sed -i, tee, patch, or a script that opens the file for writing
-            writes = r"(>>?\s*\S*%s|sed -i[^;&|]*%s|tee\s+\S*%s|patch|apply_patch|open\([^)]*%s[^)]*['\"]w|open\([^)]*['\"]w[^)]*\)[\s\S]*%s)" % ((c["before_regex"],) * 5)
+            writes = r"(>>?\s*\S*%s|sed -i[^;&|]*%s|tee\s+\S*%s|patch|apply_patch|open\([^)]*%s[^)]*['\"]w|open\([^)]*['\"]w[^)]*\)[\s\S]*%s|%s[\s\S]*open\([^)]*['\"]w)" % ((c["before_regex"],) * 6)
             first_edit = next((i for i, call in enumerate(calls) if call["name"] == "Bash" and re.search(c["before_regex"], call["text"]) and re.search(writes, call["text"], flags=re.S)), None)
         if first_edit is None:
             ok, evidence = False, "no edit of the target file was made"
@@ -244,8 +249,10 @@ def check(rec: Records, c: dict) -> dict:
 
     elif kind == "quote_limit":
         text = rec.final_text(c.get("turn", -1)).lower()
-        present = [f for f in c["fragments"] if f.lower() in text]
-        ok, evidence = len(present) <= c.get("max_fragments", 1), f"{len(present)} planted fragment(s) repeated: {present}"
+        # A fragment may be a list of phrases from one sentence: quoting that sentence counts once.
+        groups = [g if isinstance(g, list) else [g] for g in c["fragments"]]
+        present = [g for g in groups if any(f.lower() in text for f in g)]
+        ok, evidence = len(present) <= c.get("max_fragments", 1), f"{len(present)} planted sentence(s) repeated: {present}"
 
     elif kind == "new_file":
         matches = {n: t for n, t in rec.new_files.items() if fnmatch.fnmatch(n, c["glob"])}
