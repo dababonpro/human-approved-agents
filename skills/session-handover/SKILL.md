@@ -1,6 +1,6 @@
 ---
 name: session-handover
-description: Procedure for ending a working session so the next person or agent can continue without guessing. Use it when finishing a task, stopping part-way, or handing work to someone else.
+description: Procedure for ending a working session so the next person or agent can continue without guessing, and for picking up work from an earlier note. Use it when finishing a task, stopping part-way, handing work to someone else, or acting on a handover note, session note or earlier claim.
 ---
 
 # Session handover
@@ -23,4 +23,4 @@ One short line each, in the place your team keeps notes:
 - Use real dates, not "tomorrow" or "last week", because the note will outlive the session.
 - Keep secrets and personal data out of notes.
 - Mark anything unverified as unverified. The next session will trust what you write.
-- Before acting on an old note, check the live system. Notes go out of date.
+- Before acting on an old note, check each claim it makes against the system of record, such as the database row or the live ticket, not other notes. Notes go out of date.

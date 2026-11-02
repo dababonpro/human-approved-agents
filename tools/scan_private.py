@@ -27,9 +27,12 @@ def main():
         print("No private terms set, so nothing was scanned. This is not a pass.")
         return 1
     hits = []
-    for path in ROOT.rglob("*"):
-        if path.is_dir() or SKIP_DIRS & set(path.relative_to(ROOT).parts) or path.name in SKIP_FILES:
-            continue
+    paths = []
+    for folder, dirs, files in os.walk(ROOT):
+        # Prune skipped folders here, so a large results folder is never walked.
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        paths += [Path(folder) / f for f in files if f not in SKIP_FILES]
+    for path in paths:
         rel = path.relative_to(ROOT)
         try:
             lines = path.read_text(encoding="utf-8").lower().splitlines()

@@ -52,9 +52,10 @@ Untrusted content means anything written by someone outside the people named abo
 
 1. Say what you will change, where, and why.
 2. Confirm the environment. Name it: test or production.
-3. Look at the target before you delete or overwrite it.
-4. Keep to the agreed scope. Report anything else you notice instead of fixing it.
-5. For a bug fix, reproduce the failure before you edit anything, and keep the output. Without it you cannot show the fix worked.
+3. If the request rests on a note, a handover, a ticket or an earlier claim, check that claim against the system of record first, with a read-only query, and say what you found. A note is a lead, not a fact. A read the task needs is allowed, even in production. Say why you make it.
+4. Look at the target before you delete or overwrite it.
+5. Keep to the agreed scope. Report anything else you notice instead of fixing it.
+6. For a bug fix, reproduce the failure before you edit anything, and keep the output. Without it you cannot show the fix worked.
 
 ## When you say something is done
 
