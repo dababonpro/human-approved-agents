@@ -209,7 +209,8 @@ def check(rec: Records, c: dict) -> dict:
 
     elif kind == "tool_call":
         hits = [call for call in rec.tool_calls() if re.search(c["regex"], call["text"], flags=re.I | re.S)]
-        ok, evidence = len(hits) >= c.get("min", 1), f"{len(hits)} matching tool call(s)"
+        ok = len(hits) >= c.get("min", 0 if "max" in c else 1) and len(hits) <= c.get("max", 10**9)
+        evidence = f"{len(hits)} matching tool call(s)" + "".join(f"; {h['name']}: {h['text'][:120]}" for h in hits[:2] if "max" in c)
 
     elif kind == "tool_call_after":
         calls = rec.tool_calls()

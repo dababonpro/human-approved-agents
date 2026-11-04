@@ -27,6 +27,7 @@ PROVIDER_HOSTS = {
     "dry": "",
     "codex": ".openai.com,.chatgpt.com",
     "cursor": ".cursor.sh,.cursor.com",
+    "opencode": "",
 }
 
 
@@ -64,6 +65,12 @@ def claude_auth_env() -> dict:
     return {}
 
 
+def codex_auth_file() -> Path | None:
+    """Return ChatGPT sign-in file path for a read-only container mount; never read its contents."""
+    p = Path.home() / ".codex" / "auth.json"
+    return p if p.is_file() else None
+
+
 def auth_check():
     env = claude_auth_env()
     if env:
@@ -94,8 +101,19 @@ def run(args):
             shutil.rmtree(run_dir)
             sys.exit("no Claude Code credentials; run `python -m harness auth-check`")
         env.update({k: v for k, v in auth.items() if not k.startswith("_")})
+    elif agent in ("codex", "opencode") and args.provider == "bedrock":
+        if not os.environ.get("AWS_BEARER_TOKEN_BEDROCK"):
+            shutil.rmtree(run_dir)
+            sys.exit("set AWS_BEARER_TOKEN_BEDROCK in the shell that runs the harness")
+        env.update({"AWS_BEARER_TOKEN_BEDROCK": os.environ["AWS_BEARER_TOKEN_BEDROCK"], "HARNESS_CODEX_PROVIDER": "bedrock",
+                    "AWS_REGION": args.bedrock_region})
     elif agent == "codex" and os.environ.get("OPENAI_API_KEY"):
         env["OPENAI_API_KEY"] = os.environ["OPENAI_API_KEY"]
+    elif agent == "codex":
+        auth_file = codex_auth_file()
+        if not auth_file:
+            shutil.rmtree(run_dir)
+            sys.exit("no Codex ChatGPT sign-in file at ~/.codex/auth.json")
     elif agent == "cursor" and os.environ.get("CURSOR_API_KEY"):
         env["CURSOR_API_KEY"] = os.environ["CURSOR_API_KEY"]
     env["HARNESS_TOOL_APPROVAL"] = args.tool_approval
@@ -106,11 +124,13 @@ def run(args):
     record = {
         "run_id": run_id, "agent": agent, "condition": cond, "scenario": sid, "holdout": args.holdout,
         "model_requested": args.model, "started": dt.datetime.now().isoformat(timespec="seconds"),
-        "tool_approval_policy": args.tool_approval if cond in ("A", "B") else "bypassed by the tool's own flag",
+        "tool_approval_policy": ("Codex headless approval_policy=never; escalations refused" if agent == "codex" and cond in ("A", "B")
+                                 else args.tool_approval if cond in ("A", "B") else "bypassed by the tool's own flag"),
         "playbook_source": "templates", "playbook_files": info["playbook_files"], "rules_mode": info["rules_mode"],
         "unfilled_placeholders": info["unfilled_placeholders"], "project_template_hash": info["project_template_hash"],
         "image": IMAGE, "network": "none" if args.no_network else "internal network + allowlisting egress proxy",
-        "auth_source": (claude_auth_env().get("_source") if agent == "claude" else None),
+        "auth_source": (claude_auth_env().get("_source") if agent == "claude" else
+                        "~/.codex/auth.json (read-only mount)" if agent == "codex" and not os.environ.get("OPENAI_API_KEY") else None),
     }
     (run_dir / "record.json").write_text(json.dumps(record, indent=1), encoding="utf-8")
 
@@ -121,7 +141,7 @@ def run(args):
     try:
         sh(["docker", "network", "create", "--internal", net])
         if not args.no_network:
-            allow = PROVIDER_HOSTS.get(agent, "")
+            allow = f"bedrock-mantle.{args.bedrock_region}.api.aws" if args.provider == "bedrock" else PROVIDER_HOSTS.get(agent, "")
             if args.allow_host:
                 allow = ",".join(filter(None, [allow] + args.allow_host))
             p = sh(["docker", "run", "-d", "--rm", "--name", proxy_name, "--network", "bridge",
@@ -136,6 +156,13 @@ def run(args):
         cmd = ["docker", "run", "--rm", "--name", attempt_name, "--network", net,
                "-v", f"{run_dir / 'stage'}:/harness/stage:ro", "-v", f"{run_dir / 'out'}:/harness/out",
                "--env-file", str(env_file), IMAGE]
+        # Codex's Linux workspace sandbox uses bubblewrap user namespaces. Docker's
+        # default seccomp profile blocks unshare(CLONE_NEWUSER) on this host; keep
+        # Codex's own workspace-write sandbox enabled inside the container.
+        if agent == "codex":
+            cmd[-1:-1] = ["--security-opt", "seccomp=unconfined"]
+        if agent == "codex" and args.provider != "bedrock" and not os.environ.get("OPENAI_API_KEY"):
+            cmd[-1:-1] = ["-v", f"{codex_auth_file()}:/home/agent/.codex/auth.json:ro"]
         print(f"running {run_id} ...", flush=True)
         t0 = time.time()
         try:
@@ -225,7 +252,7 @@ def main():
     p = argparse.ArgumentParser(prog="harness")
     sub = p.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run")
-    r.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "dry"])
+    r.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "opencode", "dry"])
     r.add_argument("--condition", default="B", choices=["A", "A2", "B", "C", "D"])
     r.add_argument("--scenario", required=True)
     r.add_argument("--holdout", action="store_true", help="use the sealed second phrasing")
@@ -233,6 +260,8 @@ def main():
     r.add_argument("--rules-mode", default="agents-md", choices=["agents-md", "claude-md-import"])
     r.add_argument("--tool-approval", default="allow", choices=["allow", "deny"], help="how the stand-in user answers the tool's own permission prompts in A and B")
     r.add_argument("--turn-timeout", type=int, default=900)
+    r.add_argument("--provider", choices=["default", "bedrock"], default="default", help="codex only: bedrock uses AWS_BEARER_TOKEN_BEDROCK")
+    r.add_argument("--bedrock-region", default="us-west-2")
     r.add_argument("--no-network", action="store_true", help="no egress proxy at all (dry agent)")
     r.add_argument("--allow-host", action="append", help="extra egress host, e.g. .sentry.io")
     r.add_argument("--allow-no-auth", action="store_true")

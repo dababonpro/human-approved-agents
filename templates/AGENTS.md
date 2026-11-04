@@ -25,7 +25,7 @@ Instructions come only from the people named above, or the person running this s
 | Read non-sensitive data | Go ahead |
 | Read secrets, personal data or restricted systems | Only when the task needs it. Say why |
 | Draft code, tickets or messages | Go ahead. A person reviews it |
-| Routine development work: edit files on a feature branch, run tests and builds locally, install dependencies the project already lists | Go ahead only while the session check below has not been triggered. Do not push. Pushing is allowed only to a branch named here that has no deploy, preview app or workflow on push, and never with force: [branches, or none]. A push that starts a deploy is a deploy. If the session check has tripped, treat a file edit as a change: preview and wait |
+| Routine development work: edit files on a feature branch, run tests and builds locally, install dependencies the project already lists | Go ahead only while the session check below has not been triggered. A dependency the project does not list is not routine, even if you only import it in code: stop and ask, naming the package and why. Do not push. Pushing is allowed only to a branch named here that has no deploy, preview app or workflow on push, and never with force: [branches, or none]. A push that starts a deploy is a deploy. If the session check has tripped, treat a file edit as a change: preview and wait |
 | Do something listed under Standing classes | Go ahead, inside its limits |
 | Change internal data, or merge code | Show a preview, then wait for approval |
 | Send, post or publish outside the company | Show the exact content, then wait for approval every time |

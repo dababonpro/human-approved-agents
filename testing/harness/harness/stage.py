@@ -12,7 +12,7 @@ from .scenarios import get as get_scenario
 TEMPLATE = HARNESS_ROOT / "project-template"
 FIXTURES = HARNESS_ROOT / "fixtures"
 FILL = json.loads((HARNESS_ROOT / "harness" / "playbook_fill.json").read_text(encoding="utf-8"))
-SKILL_DIRS = {"claude": ".claude/skills", "dry": ".claude/skills", "codex": ".agents/skills", "cursor": ".agents/skills"}
+SKILL_DIRS = {"claude": ".claude/skills", "dry": ".claude/skills", "codex": ".agents/skills", "cursor": ".agents/skills", "opencode": ".opencode/skills"}
 
 
 def sha(path: Path) -> str:

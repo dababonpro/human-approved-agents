@@ -93,30 +93,49 @@ def dry_cmd(prompt, scenario, session_id):
     return ["python3", "/harness/bin/dry_agent.py", "-p", prompt]
 
 
-# ---------------- Codex CLI (untested) ----------------
+# ---------------- Codex CLI (OpenAI, or Bedrock with HARNESS_CODEX_PROVIDER=bedrock) ----------------
 
 def codex_cmd(prompt, scenario, session_id):
     cond = scenario["condition"]
-    base = ["codex", "exec", "--json", "-C", str(PROJECT), "--skip-git-repo-check"]
+    base = ["codex", "exec", "--json", "-C", str(PROJECT), "--skip-git-repo-check",
+            "-c", 'approval_policy="never"', "-c", 'web_search="disabled"']
     if scenario.get("model"):
         base += ["-m", scenario["model"]]
+    if os.environ.get("HARNESS_CODEX_PROVIDER") == "bedrock":
+        # Codex's built-in Bedrock provider reads AWS_BEARER_TOKEN_BEDROCK itself and needs only the region.
+        # Pinned to Codex 0.124.0: newer versions send a tool type Bedrock rejects, and this one allows only the region.
+        base += ["-c", 'model_provider="amazon-bedrock"', "-c",
+                 'model_providers.amazon-bedrock.aws.region="%s"' % os.environ.get("AWS_REGION", "us-west-2")]
     if cond in ("A2", "C", "D"):
-        base += ["-a", "never", "--sandbox", "danger-full-access"]
+        base += ["--sandbox", "danger-full-access"]
     else:
-        base += ["--sandbox", "workspace-write"]
+        # The mocks listen on 127.0.0.1, so the sandbox needs local network access.
+        base += ["--sandbox", "workspace-write", "-c", "sandbox_workspace_write.network_access=true"]
     if session_id:
-        return base[:2] + ["resume", session_id] + base[2:] + [prompt]
+        # `exec resume` accepts its own, narrower option set: in particular it
+        # rejects -C and --sandbox. The process cwd remains PROJECT and the
+        # resumed thread retains the sandbox selected for its initial turn.
+        resume = ["codex", "exec", "resume", "--json", "--skip-git-repo-check",
+                  "-c", 'approval_policy="never"', "-c", 'web_search="disabled"',
+                  "-c", "sandbox_workspace_write.network_access=true"]
+        if scenario.get("model"):
+            resume += ["-m", scenario["model"]]
+        return resume + [session_id, prompt]
     return base + [prompt]
 
 
 def codex_parse(path):
     session_id, final, tool_calls = None, "", []
+    usage = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0}
     with path.open(encoding="utf-8", errors="replace") as f:
         for line in f:
             try:
                 ev = json.loads(line)
             except json.JSONDecodeError:
                 continue
+            if ev.get("type") == "turn.completed":
+                for k in usage:
+                    usage[k] += int((ev.get("usage") or {}).get(k) or 0)
             if ev.get("type") == "thread.started":
                 session_id = ev.get("thread_id")
             item = ev.get("item") or {}
@@ -127,7 +146,7 @@ def codex_parse(path):
                     tool_calls.append({"name": "Edit", "input": {"changes": item.get("changes")}})
                 elif item.get("type") == "agent_message":
                     final = item.get("text") or final
-    return {"session_id": session_id, "final_text": final, "tool_calls": tool_calls, "compactions": 0, "usage": {}}
+    return {"session_id": session_id, "final_text": final, "tool_calls": tool_calls, "compactions": 0, "usage": usage}
 
 
 # ---------------- Cursor CLI (untested) ----------------
@@ -162,11 +181,64 @@ def cursor_parse(path):
     return {"session_id": session_id, "final_text": final, "tool_calls": tool_calls, "compactions": 0, "usage": {}}
 
 
+# ---------------- OpenCode (Bedrock's OpenAI-compatible Chat Completions) ----------------
+
+def opencode_cmd(prompt, scenario, session_id):
+    # OpenCode has no separate bypass mode. --auto approves every prompt, which matches the stand-in user
+    # answering "allow" in A and B, so every condition uses it. Its prompts are not logged one by one.
+    model = scenario.get("model") or "openai.gpt-oss-20b"
+    region = os.environ.get("AWS_REGION", "us-west-2")
+    conf = Path(os.environ["HOME"]) / ".config" / "opencode" / "opencode.json"
+    conf.parent.mkdir(parents=True, exist_ok=True)
+    conf.write_text(json.dumps({
+        "$schema": "https://opencode.ai/config.json", "autoupdate": False, "share": "disabled",
+        "provider": {"bedrock": {"npm": "@ai-sdk/openai-compatible", "name": "Amazon Bedrock",
+                                 "options": {"baseURL": f"https://bedrock-mantle.{region}.api.aws/v1",
+                                             "apiKey": "{env:AWS_BEARER_TOKEN_BEDROCK}"},
+                                 "models": {model: {"name": model}}}},
+    }), encoding="utf-8")
+    cmd = ["opencode", "run", "--format", "json", "--pure", "--auto", "--dir", str(PROJECT), "-m", f"bedrock/{model}"]
+    if session_id:
+        cmd += ["-s", session_id]
+    return cmd + [prompt]
+
+
+def opencode_parse(path):
+    session_id, texts, tool_calls = None, [], []
+    usage = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0}
+    with path.open(encoding="utf-8", errors="replace") as f:
+        for line in f:
+            try:
+                ev = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            session_id = ev.get("sessionID") or session_id
+            part = ev.get("part") or {}
+            if ev.get("type") == "text" and part.get("text"):
+                texts.append(part["text"])
+            elif ev.get("type") == "tool_use":
+                tool = part.get("tool")
+                inp = (part.get("state") or {}).get("input") or {}
+                name = {"bash": "Bash", "edit": "Edit", "write": "Write", "read": "Read"}.get(tool, tool)
+                tool_calls.append({"name": name, "input": {"command": inp.get("command"), "file_path": inp.get("filePath"),
+                                                           "content": inp.get("content"), "new_string": inp.get("newString"),
+                                                           "old_string": inp.get("oldString"), "pattern": inp.get("pattern")}})
+            elif ev.get("type") == "step_finish":
+                tok = part.get("tokens") or {}
+                usage["input_tokens"] += int(tok.get("input") or 0) + int((tok.get("cache") or {}).get("read") or 0)
+                usage["cached_input_tokens"] += int((tok.get("cache") or {}).get("read") or 0)
+                usage["output_tokens"] += int(tok.get("output") or 0) + int(tok.get("reasoning") or 0)
+    # The final answer is the text after the last tool call; keep all text if there was none.
+    return {"session_id": session_id, "final_text": texts[-1] if texts else "", "tool_calls": tool_calls,
+            "compactions": 0, "usage": usage}
+
+
 ADAPTERS = {
     "claude": (claude_cmd, claude_parse, ["claude", "--version"]),
     "dry": (dry_cmd, claude_parse, ["python3", "--version"]),
     "codex": (codex_cmd, codex_parse, ["codex", "--version"]),
     "cursor": (cursor_cmd, cursor_parse, ["agent", "--version"]),
+    "opencode": (opencode_cmd, opencode_parse, ["opencode", "--version"]),
 }
 
 
@@ -178,7 +250,8 @@ def main():
     session_id = None
     timeout = int(scenario.get("turn_timeout_seconds", 900))
     meta = {"agent": agent, "agent_version": version_of(vcmd), "started": utc(), "condition": scenario["condition"],
-            "scenario": scenario["scenario_id"], "model_requested": scenario.get("model")}
+            "scenario": scenario["scenario_id"], "model_requested": scenario.get("model"),
+            "reasoning_effort": "medium (Codex default)" if agent == "codex" else None}
     (OUT / "meta.json").write_text(json.dumps(meta, indent=1), encoding="utf-8")
 
     for i, turn in enumerate(scenario["turns"], start=1):
