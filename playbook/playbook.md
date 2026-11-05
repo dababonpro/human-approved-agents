@@ -2,7 +2,7 @@
 
 A working starter for technical leaders who want AI agents doing real work without losing control of what they do.
 
-Draft 0.7, 2 November 2026. Published by DababonPro IT Solutions. The files named below are in `templates/` and `skills/` at the top of this repository.
+Public edition 1.0, prepared 4 November 2026 by DababonPro IT Solutions.
 
 ## Who This Is For
 
@@ -89,9 +89,9 @@ Set levels per action, not per agent. One agent can read tickets at level 0 and 
 
 There is no level above 3 in this playbook. Agents that choose their own work with nobody supervising are out of scope.
 
-These levels follow common industry practice, and no published scheme for agents has been proven by experiment. Treat them as a shared vocabulary, not a measurement.
+These levels are this playbook's practical vocabulary, informed by similar schemes from AWS and IMDA. No published scheme for agents has been validated by experiment. Treat these levels as a way to discuss oversight, not as a measurement or standard.
 
-Levels 0 and 1 carry less risk, not no risk. A meta-analysis of 18 automation experiments found that when a system fails, the harm seems most likely once it moves from analysing to proposing what to do. A reader who trusts a draft and passes it on is the failure, so review drafts properly. A wrong answer also causes harm if someone acts on it.
+Levels 0 and 1 carry less risk, not no risk. A meta-analysis of 18 experiments with non-AI automation suggested that, when a system fails, harm may be more likely once it moves from analysing information to proposing what to do. This is not evidence about AI agents. A reader who trusts a draft and passes it on can still cause harm, so review drafts properly. A wrong answer also causes harm if someone acts on it.
 
 ## 4. Decide What Needs Approval
 
@@ -134,7 +134,7 @@ This is the most important section. Approval rules are instructions. Limits work
 | The agent cannot change production by accident | Separate test and production credentials, and give the agent test only |
 | Merges need a person | Branch protection with required review |
 | Data cannot be changed | Read-only database users and read-only API keys |
-| Code runs safely | A sandbox or container, with outbound network denied by default |
+| Code runs in a constrained environment | A sandbox or container, with outbound network denied by default |
 | Dangerous commands are blocked | Your tool's deny rules, hooks or permission settings |
 | Tools are vetted | An allowlist of approved MCP servers, plugins and skills, at reviewed versions |
 | Spending is capped | Budget limits at the vendor |
@@ -296,7 +296,7 @@ Stopping an agent is not retiring it. Keys, memory, schedules and downstream job
 
 ## 16. Protect The Codebase
 
-The sections above keep an agent's actions safe. This one keeps your code healthy over months. It applies if agents change software you must maintain, and you can add it after the first month.
+The sections above reduce the risk of unwanted agent actions. This one helps you watch code quality over time. It applies if agents change software you must maintain, and you can add it after the first month.
 
 Passing tests show that the checked behaviour works. They say little about whether the code is still easy to change, and the cost of poor design often appears long after the change that caused it. Agents can also reach a pass by weakening a test. One practitioner, Dex Horthy, who sells tools in this space, reports agent-built codebases starting to struggle after three to six months. That evidence is mostly experience, not controlled study, so treat it as a warning, not a measurement.
 
@@ -308,9 +308,9 @@ Passing tests show that the checked behaviour works. They say little about wheth
 | Medium | One short plan: the goal, the approach, the files that change, and how it will be tested |
 | Large | Product intent, then system design, then program design: key types, signatures and file changes |
 
-**Build thin slices.** Ask for one small end-to-end piece at a time, each testable by itself. Agents tend to plan layer by layer, which leaves little you can try end to end until late. Checking 100 to 200 lines and correcting course is far cheaper than finding a problem at the end of 2,000.
+**Build thin slices.** Ask for one small end-to-end piece at a time, each testable by itself. Agents tend to plan layer by layer, which leaves little you can try end to end until late. Review each slice before building on it, so mistakes are easier to find and correct.
 
-**Keep the promises in a feature map.** List the 5 to 10 flows that would hurt most if they broke. For each, write what must stay true, which code can break it, and what proves it. A check matches each changed file to the features that list it, runs their proof, and fails on files with no feature. It does not follow dependencies between features, or see changes outside the paths you map, so also run every proof on a schedule and after any dependency or CI change. The `feature-map` skill and script in `skills/` do this. Add a line each time you fix a repeat bug, and let the map grow from real failures.
+**Keep the promises in a feature map.** List the 5 to 10 flows that would hurt most if they broke. For each, write what must stay true, which code can break it, and what proves it. A check matches each changed file to the features that list it, runs their proof, and fails on files with no feature. It does not follow dependencies between features, or see changes outside the paths you map, so also run every proof on a schedule and after any dependency or CI change. The `feature-map` skill and script in `files/skills/` do this. Add a line each time you fix a repeat bug, and let the map grow from real failures.
 
 Two habits make a feature map trustworthy:
 
@@ -327,7 +327,7 @@ Two habits make a feature map trustworthy:
 
 ## What To Do Next
 
-Adopt the files on one project, and change anything that does not fit how your team works. They are meant to be edited. `templates/examples/` shows the risk card and `AGENTS.md` filled in for an imaginary team.
+Adopt the files on one project, and change anything that does not fit how your team works. They are meant to be edited. `files/examples/` shows the risk card and `AGENTS.md` filled in for an imaginary team.
 
 ## Appendix: Where The Limit Lives In Each Tool
 
@@ -337,7 +337,7 @@ Section 5 says to block the dangerous thing in the system. This is where each ma
 |---|---|---|---|
 | Claude Code | Permission modes and allow, ask and deny rules in settings; hooks that run before a tool call; a sandbox | `--dangerously-skip-permissions` | [Permissions](https://code.claude.com/docs/en/permissions) |
 | OpenAI Codex CLI | `--sandbox read-only`, `workspace-write` or `danger-full-access`; `--ask-for-approval` in interactive `codex`; `approval_policy` in `config.toml` or `-c` | `--dangerously-bypass-approvals-and-sandbox`, or in `codex exec`, `-c approval_policy="never" --sandbox danger-full-access`. `codex exec` has no `-a` flag | [Approvals and security](https://learn.chatgpt.com/docs/agent-approvals-security) |
-| Cursor | Run Modes: Auto-review (default, a classifier), Allowlist, Run Everything. The docs say Auto-review is not a security boundary | Run Everything mode. `--force` (alias `--yolo`) allows commands unless denied, and lets print mode apply file edits. `--approve-mcps` is separate | [Run Modes](https://cursor.com/docs/agent/security/run-modes) |
+| Cursor | Run Modes: Auto-review (default, a classifier), Allowlist, Run Everything. The docs say Auto-review is not a security boundary | Run Everything mode. `--force` (alias `--yolo`) allows commands unless denied, and lets print mode apply file edits. `--approve-mcps` is separate | [Run Modes](https://cursor.com/docs/agent/security/run-modes), [CLI parameters](https://cursor.com/docs/cli/reference/parameters), [MCP](https://cursor.com/docs/cli/mcp) |
 | GitHub Copilot CLI | `--allow-tool` and `--deny-tool` patterns, path and URL checks; `--assisted-approval` is a classifier; the cloud agent is governed by repository settings and branch protection | `--allow-all`. `--allow-all-tools` alone still checks paths and URLs | [CLI reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference), [cloud agent](https://docs.github.com/en/copilot/concepts/copilot-surfaces/copilot-on-github) |
 | Google Antigravity CLI | `toolPermission` in `~/.gemini/antigravity-cli/settings.json`: `strict`, `always-proceed`, `proceed-in-sandbox` or `request-review` | `--dangerously-skip-permissions` | [Headless](https://antigravity.google/docs/cli/headless), [CLI reference](https://antigravity.google/docs/cli/reference) |
 

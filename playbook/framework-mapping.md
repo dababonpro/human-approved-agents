@@ -1,6 +1,6 @@
 # Framework Mapping
 
-Mapped 1 November 2026 against the full text of each document, and re-scored on Draft 0.6 on 2 November 2026. A Full score means the text tells the reader to do the thing, and for NIST that it would produce any record NIST asks for. It does not mean it was tested.
+Mapped 1 November 2026 against the full text of each document, then re-scored in a separate pass by the same project against Draft 0.6 on 2 November 2026. The mapping scores below describe Draft 0.6; they have not been recalculated for public edition 1.0. A Full score means the text tells the reader to do the thing, and for NIST that it would produce any record NIST asks for. It does not mean it was tested or independently reviewed.
 
 **What we claim:** this playbook draws on these frameworks, scaled for small teams, with stated omissions. We do not claim alignment, compliance or certification. NIST and ASEAN describe themselves as voluntary. IMDA's text does not use the word, and none of the three is presented as law. Each needs to be read directly by anyone relying on it, and laws such as data protection rules apply separately.
 
@@ -20,7 +20,7 @@ Section numbers refer to `playbook.md`. These frameworks do not address the main
 | NIST AI 100-1 | 72 | 35 | 33 | 2 | 2 |
 | ASEAN guides | 145 | 53 | 64 | 17 | 11 |
 
-These are one strict reader's judgements, made by an AI model, not official scores, and they show spread only. Apart from NIST's 72 subcategories, the rows are our own breakdown. Scored on Draft 0.6 on 2 November 2026. A blind second scoring of 40 random rows matched 30, and marked 6 of the 18 sampled Full rows as Partial, so treat the Full counts as an upper estimate.
+These are one strict reader's judgements, made by an AI model, not official scores, and they show spread only. Apart from NIST's 72 subcategories, the rows are our own breakdown. Scored on Draft 0.6 on 2 November 2026. A blind second scoring of 40 random rows matched 30, and marked 6 of the 18 sampled Full rows as Partial, so treat the Full counts as an upper estimate. The second scoring was not independent of the project or model-assisted process.
 
 ## IMDA Model AI Governance Framework For Agentic AI
 
