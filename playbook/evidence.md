@@ -12,6 +12,8 @@ Checked 1 November 2026, with the section 16 rows added 2 November 2026. This sh
 | Least privilege | **Backed** | NIST SP 800-53 AC-6 (formal standard), Careful Adoption, OWASP LLM06:2025, NCSC UK | Nothing material |
 | Stop capability and drills | **Backed** | NIST SP 800-53 IR-3 and IR-4 (formal standard), EU AI Act Art 14(4)(e) for high-risk systems, NIST AI 600-1 MG-2.4 | No body sets a drill frequency |
 | Silence and unknown actions: deny | **Backed by guidance** | IMDA v1.5 §2.2.2, Careful Adoption p20 (stop and escalate when uncertain), OpenAI guardrails docs (for cybersecurity workflows only) | No formal standard says this for agents |
+| Keep secrets out of what the agent reads | **Guidance, and our own test data** | OWASP LLM02:2025 (sensitive information disclosure). In this playbook's Claude Code runs a planted secret reached the agent's context in 53 of 390 final attempts, and left the session in none. After a rule to hide values while reading, a recheck of the four worst scenarios fell from 34 of 70 to 11 of 70, all where a password sat inside a setting the agent needed | Our runs use one tool and a mock project. Which controls work best is our judgement |
+| Offer an immediate and a long-term fix with a diagnosis | **Our judgement** | Common practice in incident handling: contain first, then prevent recurrence. Tested as R1 | No study on agents |
 | Limits in the system, not only instructions | **Backed by guidance** | IMDA v1.5 §2.1.2 and §2.3.1, Careful Adoption, NCSC UK, Google, AWS | Which limits suit a small team is our judgement |
 | Instructions in content are data | **Goal backed. Not a control** | NCSC UK, OWASP LLM01:2025 and ASI01, Google, NIST CAISI (over 250,000 attempts, at least one success against each of 13 frontier models) | NCSC says injection may never be fully mitigated, so the rule only reduces risk |
 | Feature map | **Our method. One small pilot and one agent trial** | Traceability, plus Anthropic's code migration write-up (validate a judge against broken code) and verification loops article (check each change against a spec). The combination with a required check is ours | One repo, one replayed regression, one agent trial on a sample project. Not tested over time, or on a real pull request |
@@ -67,7 +69,7 @@ Checked 1 November 2026, with the section 16 rows added 2 November 2026. This sh
 
 **Community standards**
 
-- [OWASP Top 10 for Agentic Applications 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/), [LLM01:2025](https://genai.owasp.org/llmrisk/llm01-prompt-injection/), [LLM06:2025](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
+- [OWASP Top 10 for Agentic Applications 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/), [LLM01:2025](https://genai.owasp.org/llmrisk/llm01-prompt-injection/), [LLM02:2025](https://genai.owasp.org/llmrisk/llm022025-sensitive-information-disclosure/), [LLM06:2025](https://genai.owasp.org/llmrisk/llm062025-excessive-agency/)
 - [MCP Tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools) and [Schema](https://modelcontextprotocol.io/specification/2026-07-28/schema), revision of 28 July 2026. The tool annotations are unchanged from the 2025-11-25 revision
 
 **Research**

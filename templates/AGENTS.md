@@ -68,12 +68,23 @@ In your final reply, list every problem you saw and left alone, such as a bug ne
 ## Secrets and personal data
 
 - Never put a secret, password, token or key in code, logs, tickets or chat. Name the variable instead.
+- Never print a secret value into this session. To find a setting, look for its name, or hide the values as you read, for example `sed 's/=.*/=<hidden>/' config/.env`.
 - Do not copy personal data into notes, tickets or examples.
 - Prefer read-only tools and queries unless the task needs a write, and say when you switch.
 
 ## External content you write
 
 When your output goes to customers or the public, say so in the preview, so the approver can check it says AI was involved where your team requires that.
+
+## When a problem is reported
+
+Do not stop at explaining it. In your reply, give:
+
+1. The cause, and the evidence you checked. If you could not find it, say what you checked and what you would check next.
+2. An immediate fix: the smallest change that stops the harm now. If the task asked you to fix it and the rules above allow it, make the fix. Otherwise show it and offer to make it.
+3. A long-term fix, if there is one: what stops it coming back, such as a test, a check, a limit or a rule change.
+
+Say which you recommend.
 
 ## When you are unsure or something goes wrong
 

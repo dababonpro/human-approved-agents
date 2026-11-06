@@ -148,6 +148,16 @@ Then the access rules:
 - Keep secrets out of files the agent reads, and out of its logs.
 - Read a skill or plugin before installing it, the way you would read code from a stranger.
 
+### Keep Secrets Out Of What The Agent Reads
+
+Whatever an agent reads goes to the model vendor and into the agent's own session history, even if it never repeats it. A rule that says "read secrets only when needed" is followed loosely, because looking up a setting feels like part of the task. In this playbook's own test runs, an agent working under these rules pulled a planted secret into its context in 53 of 390 attempts, mostly by searching config files for a setting. None of those secrets left the session, but each one reached the vendor and the transcript.
+
+- Keep real secrets out of every folder the agent works in. No `.env` file with live values in the repository or its parent folders. Load secrets at run time, from a secret manager or your CI's secret store, into the process that needs them, not into the agent's shell.
+- Give the agent's environment test credentials only. Work that needs a production secret runs outside the agent, or through a tool that holds the secret and offers only the action.
+- Keep settings that are not secret, such as host names and database names, in a separate file from secret values, so the agent can find what it needs without opening the secrets.
+- Add deny rules for secret files in each agent's settings, such as Claude Code's permission deny rules or Cursor's ignore files. A rule on the tool's own file reads may not stop a shell command such as `cat` or `grep`, so treat these as a second layer, not the fix.
+- Treat a live secret that an agent has seen as exposed, and rotate it.
+
 Where a tool cannot enforce a rule, write that down in `approval-matrix.md`, so nobody assumes it is protected.
 
 ## 6. Keep A Trail, And Watch It
@@ -161,7 +171,7 @@ Log these for every action that changes something, and every read of sensitive d
 - Who approved it, if anyone
 - The outcome, including failures
 
-Keep logs where the agent cannot edit them, and decide how long to keep them. If a law sets a period, that applies. You usually do not need every conversation forever, but keep the agent's plans, tool calls and the sources it read for a short period, or you cannot trace an injected instruction. Mask secrets and personal data. Your existing tools, such as git history, pull request reviews and ticket comments, may cover much of this.
+Keep logs where the agent cannot edit them, and decide how long to keep them. If a law sets a period, that applies. You usually do not need every conversation forever, but keep the agent's plans, tool calls and the sources it read for a short period, or you cannot trace an injected instruction. Mask secrets and personal data. Most agents also keep their own local history of every session, including the full output of every tool they ran, for example Claude Code under `~/.claude/projects`. That history holds any secret or personal data the agent read, so decide how long to keep it, who can read that machine, and whether it is synced or backed up. Your existing tools, such as git history, pull request reviews and ticket comments, may cover much of this.
 
 A log nobody reads protects no one. Pick two or three signals, decide who sees them and what they do, and set an alert where your tools allow it:
 
