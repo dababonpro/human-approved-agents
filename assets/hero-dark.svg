@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="1200" height="360" role="img" aria-labelledby="t d">
+  <title id="t">The Human-Approved Agent Playbook</title>
+  <desc id="d">An agent's action passes three layers before it lands: rules the agent reads, limits it cannot cross, and people who check.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#58A6FF"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="360" rx="24" fill="#0D1117"/>
+  <rect x="1" y="1" width="1198" height="358" rx="23" fill="none" stroke="#30363D" stroke-width="2"/>
+
+  <g font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+    <text x="64" y="82" font-size="15" font-weight="600" letter-spacing="2" fill="#58A6FF">FREE GUIDE · TEMPLATES · AGENT SKILLS</text>
+    <text x="64" y="150" font-size="52" font-weight="700" fill="#E6EDF3">The Human-Approved</text>
+    <text x="64" y="210" font-size="52" font-weight="700" fill="#E6EDF3">Agent Playbook</text>
+    <text x="64" y="262" font-size="21" fill="#9DA7B3">Rules the agent reads. Limits it cannot cross.</text>
+    <text x="64" y="292" font-size="21" fill="#9DA7B3">People who check.</text>
+  </g>
+
+  <!-- The action's path -->
+  <line x1="712" y1="180" x2="1100" y2="180" stroke="#58A6FF" stroke-width="4" marker-end="url(#arrow)"/>
+  <circle cx="712" cy="180" r="10" fill="#58A6FF"/>
+
+  <!-- Layer 1: rules, dashed because they can fail -->
+  <rect x="770" y="104" width="64" height="152" rx="14" fill="#161B22" stroke="#58A6FF" stroke-width="3" stroke-dasharray="10 8"/>
+  <path d="M790 150 h24 M790 166 h24 M790 182 h16" stroke="#58A6FF" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Layer 2: limits, solid -->
+  <rect x="888" y="104" width="64" height="152" rx="14" fill="#1F3A5F" stroke="#58A6FF" stroke-width="3"/>
+  <rect x="905" y="168" width="30" height="24" rx="4" fill="#58A6FF"/>
+  <path d="M911 168 v-8 a9 9 0 0 1 18 0 v8" fill="none" stroke="#58A6FF" stroke-width="4"/>
+
+  <!-- Layer 3: people -->
+  <rect x="1006" y="104" width="64" height="152" rx="14" fill="#161B22" stroke="#58A6FF" stroke-width="3"/>
+  <circle cx="1038" cy="160" r="10" fill="#58A6FF"/>
+  <path d="M1020 196 a18 16 0 0 1 36 0 z" fill="#58A6FF"/>
+
+  <!-- Approved -->
+  <circle cx="1132" cy="180" r="22" fill="#3FB950"/>
+  <path d="M1121 181 l7 7 l14 -15" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <g font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" fill="#9DA7B3" text-anchor="middle">
+    <text x="712" y="152">Action</text>
+    <text x="802" y="286">Rules</text>
+    <text x="920" y="286">Limits</text>
+    <text x="1038" y="286">People</text>
+    <text x="1132" y="232">Done</text>
+  </g>
+</svg>
