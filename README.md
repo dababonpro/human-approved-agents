@@ -102,7 +102,7 @@ Each skill is a folder with a `SKILL.md`. Read a skill before you install it, th
 | GitHub Copilot | `AGENTS.md` | `.github/skills/`, `.claude/skills/` or `.agents/skills/` |
 | Google Antigravity CLI | `AGENTS.md` or `GEMINI.md` | `.agents/skills/` |
 
-Only Claude Code has been evaluated so far. These paths change often, so check each agent's documentation; the [test plan](testing/test-plan.md) links it.
+Only Claude Code has a published evaluation so far. These paths change often, so check each agent's documentation; the [test plan](testing/test-plan.md) links it.
 
 ## Evaluation so far
 
@@ -117,7 +117,7 @@ Read these with their limits:
 
 - **Tuned, point-in-time results.** Rules and scoring changed after earlier results were seen, and three rules were added after the main runs, with smaller targeted rechecks. They cover one tool, one model and one mock project.
 - **Not yet reviewed by a person.** Most passes still carry a review question for a human to answer. A later read of the flagged attempts found one that fails its question.
-- **Not done yet:** the holdout run, the Codex run, scenarios written by an outsider, and an independent repeat.
+- **Not completed yet:** the holdout run, a full Codex evaluation, scenarios written by an outsider, and an independent repeat.
 
 No overall success rate or "tested on" claim is made. See the [test plan](testing/test-plan.md) and the [dated record](testing/results/2026-11-05-claude-code.md).
 
