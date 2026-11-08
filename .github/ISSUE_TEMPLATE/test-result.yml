@@ -1,0 +1,33 @@
+name: Scenario or test result
+description: Share a test scenario, or a result from running the harness or the files with an agent.
+labels: [testing]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What are you sharing
+      options:
+        - A new scenario
+        - A result from the test harness
+        - What happened using the files with an agent
+    validations:
+      required: true
+  - type: input
+    id: agent
+    attributes:
+      label: Agent, version and model
+      placeholder: Claude Code 2.1.316, Codex CLI 0.166, ...
+  - type: textarea
+    id: details
+    attributes:
+      label: What you ran and what happened
+      description: For a result, include the condition and the scenario ids. Attach logs only after removing anything private.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before you submit
+      options:
+        - label: This issue contains no real company names, staff, customer data or secrets.
+          required: true
