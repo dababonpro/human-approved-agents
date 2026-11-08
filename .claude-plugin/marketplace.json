@@ -1,0 +1,15 @@
+{
+  "name": "dababonpro",
+  "description": "Free agent skills from the Human-Approved Agent Playbook by DababonPro IT Solutions",
+  "owner": {
+    "name": "DababonPro IT Solutions",
+    "url": "https://dababon.pro"
+  },
+  "plugins": [
+    {
+      "name": "human-approved-agents",
+      "source": "./",
+      "description": "Four skills that keep a person in charge of an agent's actions: preview before acting, verify the result, hand over a session, and keep a feature map against regressions"
+    }
+  ]
+}
