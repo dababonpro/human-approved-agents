@@ -1,0 +1,13 @@
+{
+  "name": "human-approved-agents",
+  "version": "1.0.0",
+  "description": "Four skills that keep a person in charge of an agent's actions: preview before acting, verify the result, hand over a session, and keep a feature map against regressions",
+  "author": {
+    "name": "DababonPro IT Solutions",
+    "url": "https://dababon.pro"
+  },
+  "homepage": "https://github.com/dababonpro/human-approved-agents",
+  "repository": "https://github.com/dababonpro/human-approved-agents",
+  "license": "MIT",
+  "keywords": ["agents", "approval", "human-in-the-loop", "verification", "handover", "regression"]
+}

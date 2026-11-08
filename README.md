@@ -19,6 +19,22 @@ A free playbook, templates and agent skills for small teams putting AI agents to
 | **Costs** | Free. Guide and templates under CC BY 4.0, skills and code under MIT |
 | **Not covered** | Multi-agent systems, agents that control a desktop or browser, agents that talk to customers on their own, and agents that decide about people |
 
+## Try it in five minutes
+
+**1. Give your agent the rules.** Copy [`templates/AGENTS.md`](templates/AGENTS.md) to the root of your project and fill in the `[brackets]`: who owns the rules, how to run the tests, what counts as production, and what the agent must never touch. Your agent now asks before it changes, sends, deletes or deploys anything that matters. Claude Code reads `AGENTS.md` when there is no `CLAUDE.md`; if you have one, add a line `@AGENTS.md` to it.
+
+**2. Add the skills.** In Claude Code:
+
+```text
+/plugin install human-approved-agents --marketplace dababonpro/human-approved-agents
+```
+
+On an older Claude Code, run `/plugin marketplace add dababonpro/human-approved-agents`, then `/plugin install human-approved-agents@dababonpro`. For other agents, copy the folders in [`skills/`](skills/) to where your agent loads skills (see [the table below](#where-each-agent-reads-these-files)).
+
+**3. Try it.** Ask your agent to do something risky in a test project, such as "mark every open order in the test database as shipped". It should show you exactly what it will change and wait for approval before it acts.
+
+The rules are a first layer, and an agent can still ignore them. Read [the three layers](#the-idea-three-layers) before you trust them with anything you could not afford to lose.
+
 ## The idea: three layers
 
 An agent is different from other AI use because it acts. It runs commands, changes records and sends messages. So no single control is enough. Each layer catches what the one before it misses.
