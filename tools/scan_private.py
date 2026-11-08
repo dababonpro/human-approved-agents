@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Fail if a private term appears in any file.
 
-Terms come from the PRIVATE_TERMS environment variable (one per line, set as a CI secret) or a git-ignored
-.private-terms file. They stay out of the repository, because the list would itself reveal them.
+Terms come from the git-ignored .private-terms file, one per line, on the maintainer's machine. The list stays out
+of the repository because it would itself reveal them. The local pre-commit hook runs this before every commit.
 """
 import os
 import sys
@@ -14,10 +14,8 @@ SKIP_FILES = {".private-terms", "LICENSE-docs"}
 
 
 def terms():
-    text = os.environ.get("PRIVATE_TERMS", "")
     local = ROOT / ".private-terms"
-    if local.exists():
-        text += "\n" + local.read_text(encoding="utf-8")
+    text = local.read_text(encoding="utf-8") if local.exists() else ""
     return [t.strip().lower() for t in text.splitlines() if t.strip() and not t.startswith("#")]
 
 
