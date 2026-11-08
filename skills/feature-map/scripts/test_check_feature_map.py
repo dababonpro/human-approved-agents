@@ -1,3 +1,5 @@
+# Part of the Human-Approved Agent Playbook by DababonPro IT Solutions.
+# Copyright (c) 2026 DababonPro IT Solutions. MIT licence; full text in the LICENSE file in this skill's folder.
 """Tests for check_feature_map.py. Each test builds a throwaway git repo. Run: python -m unittest test_check_feature_map"""
 
 import os

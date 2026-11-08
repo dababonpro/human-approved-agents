@@ -1,5 +1,7 @@
 # Pre-Launch Checklist
 
+*From the Human-Approved Agent Playbook by DababonPro IT Solutions, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Suggested credit if you adapt it: keep this line and note what you changed.*
+
 Run this before an agent does real work, before you raise a level, and after a change of model, tool, access or scope.
 
 Agent: [name]. Owner: [name]. Date: [date]. Action and level requested: [action, 0-3].

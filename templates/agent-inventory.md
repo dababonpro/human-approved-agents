@@ -1,5 +1,7 @@
 # Agent Inventory
 
+*From the Human-Approved Agent Playbook by DababonPro IT Solutions, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Suggested credit if you adapt it: keep this line and note what you changed.*
+
 Team owner: [name]. Senior sponsor: [name]. Last reviewed: [date]. Review this quarterly, and whenever an agent changes.
 
 | Agent | What it does | Can read and change | Human owner | Tool, model, version | Vendor, and data sent to it | Skills and connectors | Identity or key | Key expires | Highest level in use | Risk card | How to stop it |

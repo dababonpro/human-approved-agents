@@ -1,5 +1,7 @@
 # Agent Rules
 
+*From the Human-Approved Agent Playbook by DababonPro IT Solutions, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Suggested credit if you adapt it: keep this line and note what you changed.*
+
 These rules apply to every AI agent working in this project. Replace each `[bracket]` before you commit this file.
 
 These rules are a first layer. They work alongside permissions and reviews, and do not replace them.

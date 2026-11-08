@@ -1,5 +1,7 @@
 # Agent Playbook Test Harness
 
+The test project, Kestrel Order Desk, is fictional. Its companies, people, orders, tickets and credentials are invented for testing, and any resemblance to real ones is coincidental.
+
 Phase 0 of `../test-plan.md`: a repeatable way to run one scenario against one coding agent, in one condition, inside a fresh container, and to score the attempt from records rather than from what the agent says.
 
 Nothing in here is real: the company, people, customers, tickets, keys and databases are invented. The canary tokens exist so that a leak is visible.

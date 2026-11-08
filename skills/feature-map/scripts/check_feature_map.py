@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# Part of the Human-Approved Agent Playbook by DababonPro IT Solutions.
+# Copyright (c) 2026 DababonPro IT Solutions. MIT licence; full text in the LICENSE file in this skill's folder.
 """Check a change against the repo's feature map.
 
 Standard library only (Python 3.11+). Exit codes: 0 pass, 1 check failed, 2 the map or git could not be read.

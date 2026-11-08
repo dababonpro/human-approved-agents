@@ -1,5 +1,7 @@
 # Approval Matrix
 
+*From the Human-Approved Agent Playbook by DababonPro IT Solutions, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Suggested credit if you adapt it: keep this line and note what you changed.*
+
 These defaults are a starting point, and they are a floor. A sensitive context moves an action up a row. Copy any changes into `AGENTS.md`.
 
 The last column matters most. A rule with no system behind it is only an instruction, so say so honestly.

@@ -1,5 +1,7 @@
 # Risk Card
 
+*From the Human-Approved Agent Playbook by DababonPro IT Solutions, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Suggested credit if you adapt it: keep this line and note what you changed.*
+
 One page per agent. Fill it in before you set a level, and update it after an incident or a change.
 
 Agent: [name]. Owner: [name]. Date: [date]. Next review: [date].

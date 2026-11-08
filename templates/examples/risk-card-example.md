@@ -1,5 +1,7 @@
 # Risk Card: Worked Example
 
+*From the Human-Approved Agent Playbook by DababonPro IT Solutions, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Suggested credit if you adapt it: keep this line and note what you changed.*
+
 An imaginary team, used to show what a filled-in card looks like. Pellamrow Desk is a 14-person company running an internal tool that books meeting rooms and desks for its office tenants, with a shared support inbox. Nothing here describes a real company.
 
 Agent: support-triage. Owner: Priya (engineering lead). Date: 2026-11-01. Next review: 2027-02-01.

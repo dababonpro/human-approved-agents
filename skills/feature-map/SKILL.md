@@ -79,3 +79,7 @@ Report which features were touched, their promises, which proofs ran, and the re
 | Infrastructure breaks a feature | Config is not listed under `code` | Add policy, routing and deployment files |
 
 This method has had one small pilot and one agent trial, so test it on your own repo. Known limits: `references/known-limits.md`.
+
+---
+
+*Part of the Human-Approved Agent Playbook by DababonPro IT Solutions. Copyright (c) 2026 DababonPro IT Solutions. Licensed under the MIT licence; the full text is in the `LICENSE` file in this folder.*

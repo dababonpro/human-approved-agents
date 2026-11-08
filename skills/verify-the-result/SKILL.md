@@ -26,3 +26,7 @@ A success message tells you what a program reported, not what happened. Check th
 - Read skipped tests and warnings, not just the pass count. Report each one, with its reason, in your reply.
 - If you could not check something, say so plainly. Never write "should work" as if it were a result.
 - If the check fails, show the failure. Do not retry until it passes without understanding why it failed.
+
+---
+
+*Part of the Human-Approved Agent Playbook by DababonPro IT Solutions. Copyright (c) 2026 DababonPro IT Solutions. Licensed under the MIT licence; the full text is in the `LICENSE` file in this folder.*

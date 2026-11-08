@@ -24,3 +24,7 @@ One short line each, in the place your team keeps notes:
 - Keep secrets and personal data out of notes.
 - Mark anything unverified as unverified. The next session will trust what you write.
 - Before acting on an old note, check each claim it makes against the system of record, such as the database row or the live ticket, not other notes. Notes go out of date.
+
+---
+
+*Part of the Human-Approved Agent Playbook by DababonPro IT Solutions. Copyright (c) 2026 DababonPro IT Solutions. Licensed under the MIT licence; the full text is in the `LICENSE` file in this folder.*

@@ -1,5 +1,7 @@
 # Agent Incident Runbook
 
+*From the Human-Approved Agent Playbook by DababonPro IT Solutions, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Suggested credit if you adapt it: keep this line and note what you changed.*
+
 Fill this in before you need it. Keep it where people can find it during a bad day.
 
 Agent owner: [name, contact]. Backup: [name, contact]. Security or data contact: [name, contact]. Vendor support: [contact].
