@@ -7,6 +7,7 @@ Public edition 1.0.
 - Evaluation results for Claude Code, with their limits, in `testing/results/2026-11-05-claude-code.md`
 - Agent rules for problem reports, unlisted dependencies, secrets, and checking notes against the system of record
 - The skills install as a Claude Code plugin from this repository
+- A `setup-agent-rules` skill that writes `AGENTS.md` from a few questions
 - A five-minute quick start, a hero image and issue templates
 
 ## 0.7.0, unreleased
