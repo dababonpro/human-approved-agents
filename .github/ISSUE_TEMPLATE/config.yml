@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/dababonpro/human-approved-agents/discussions
+    about: Ask how to apply the playbook, or share how your team uses it.
+  - name: Security problem
+    url: https://github.com/dababonpro/human-approved-agents/security/advisories/new
+    about: Report it privately. Please do not open a public issue for one.

@@ -1,4 +1,4 @@
-# Replace the team name once the organisation exists. Required code-owner review needs a second person,
+# Changes to these paths need review from the owners team in the dababonpro organisation. Required code-owner review needs a second person,
 # because GitHub does not let you approve your own pull request; until then CI does not pass --promises-approved.
 /features.toml      @dababonpro/owners
 /tools/             @dababonpro/owners
