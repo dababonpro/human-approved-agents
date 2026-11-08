@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
       - name: Feature map check script tests
@@ -34,21 +34,24 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           # The base branch's copy judges the change. On first adoption the branch's copy is used once.
+          # No --promises-approved: that needs required review by a second person, and this repository has one
+          # maintainer. A change that weakens the map fails here, and the maintainer handles it by hand.
           SCRIPT=skills/feature-map/scripts/check_feature_map.py
           git show "$BASE_SHA:$SCRIPT" > "$RUNNER_TEMP/check.py" || cp "$SCRIPT" "$RUNNER_TEMP/check.py"
-          python "$RUNNER_TEMP/check.py" --base "$BASE_SHA" --run --promises-approved | tee -a "$GITHUB_STEP_SUMMARY"
+          python "$RUNNER_TEMP/check.py" --base "$BASE_SHA" --run | tee -a "$GITHUB_STEP_SUMMARY"
           exit "${PIPESTATUS[0]}"
 
   # The private terms are a secret, so this job runs only on main and never on a pull request's code.
+  # Add the PRIVATE_TERMS repository secret (one term per line) before the first push, or this job fails.
   private-terms:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
       - name: Private terms

@@ -3,7 +3,9 @@
 FROM node:22-bookworm-slim
 
 ARG CLAUDE_CODE_VERSION=2.1.316
-ARG CODEX_VERSION=0.166.0-alpha.5.1
+# Codex: the newest stable release at least two weeks old on 2026-11-08. No full Codex run has completed with this
+# harness yet, so treat the Codex adapter as untested on this version.
+ARG CODEX_VERSION=0.164.0
 ARG OPENCODE_VERSION=1.19.3
 ARG INSTALL_CURSOR=0
 

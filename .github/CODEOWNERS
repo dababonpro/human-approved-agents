@@ -1,4 +1,5 @@
-# Replace the team name once the organisation exists. Turn on required code-owner review in branch protection.
+# Replace the team name once the organisation exists. Required code-owner review needs a second person,
+# because GitHub does not let you approve your own pull request; until then CI does not pass --promises-approved.
 /features.toml      @dababonpro/owners
 /tools/             @dababonpro/owners
 /skills/            @dababonpro/owners
