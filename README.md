@@ -14,24 +14,31 @@ A free playbook, templates and agent skills for small teams putting AI agents to
 | | |
 |---|---|
 | **For** | Teams of 5 to 50 people with no governance committee and no platform budget, whose people already use coding or office agents |
-| **You get** | A guide, six fill-in templates, four agent skills, and a test harness |
+| **You get** | A guide, six fill-in templates, five agent skills, and a test harness |
 | **First step** | One afternoon on one lower-risk project: about four hours, reading and drafting only, in a test environment |
 | **Costs** | Free. Guide and templates under CC BY 4.0, skills and code under MIT |
 | **Not covered** | Multi-agent systems, agents that control a desktop or browser, agents that talk to customers on their own, and agents that decide about people |
 
 ## Try it in five minutes
 
-**1. Give your agent the rules.** Copy [`templates/AGENTS.md`](templates/AGENTS.md) to the root of your project and fill in the `[brackets]`: who owns the rules, how to run the tests, what counts as production, and what the agent must never touch. Your agent now asks before it changes, sends, deletes or deploys anything that matters. Claude Code reads `AGENTS.md` when there is no `CLAUDE.md`; if you have one, add a line `@AGENTS.md` to it.
-
-**2. Add the skills.** In Claude Code:
+**1. Install the skills.** In Claude Code:
 
 ```text
 /plugin install human-approved-agents --marketplace dababonpro/human-approved-agents
 ```
 
-On an older Claude Code, run `/plugin marketplace add dababonpro/human-approved-agents`, then `/plugin install human-approved-agents@dababonpro`. For other agents, copy the folders in [`skills/`](skills/) to where your agent loads skills (see [the table below](#where-each-agent-reads-these-files)).
+**2. Set up the rules.** Open your project and say *"set up the agent rules"*, or run `/human-approved-agents:setup-agent-rules`. The agent reads your project, asks a few short questions (who approves risky actions, what counts as production, what it must never touch), shows you the rules, and writes `AGENTS.md` once you say yes. From then on it asks before it changes, sends, deletes or deploys anything that matters.
 
-**3. Try it.** Ask your agent to do something risky in a test project, such as "mark every open order in the test database as shipped". It should show you exactly what it will change and wait for approval before it acts.
+**3. Try it.** In a test project, ask your agent to change several records, such as *"mark every open order as shipped"*. It should show you exactly what it will change and wait for approval.
+
+<details>
+<summary>Using Codex, Cursor, Copilot or another agent, or an older Claude Code</summary>
+
+- **Older Claude Code:** run `/plugin marketplace add dababonpro/human-approved-agents`, then `/plugin install human-approved-agents@dababonpro`.
+- **Any agent that can read the web:** paste this, then answer its questions: *"Read https://raw.githubusercontent.com/dababonpro/human-approved-agents/main/skills/setup-agent-rules/SKILL.md and follow it to set up the agent rules in this project."*
+- **By hand:** copy [`templates/AGENTS.md`](templates/AGENTS.md) to your project root and fill in the `[brackets]`. Copy the folders in [`skills/`](skills/) to where your agent loads skills ([see the table](#where-each-agent-reads-these-files)).
+
+</details>
 
 The rules are a first layer, and an agent can still ignore them. Read [the three layers](#the-idea-three-layers) before you trust them with anything you could not afford to lose.
 
@@ -95,12 +102,13 @@ There is no level above 3. Agents that choose their own work with nobody supervi
 ```text
 playbook/      The guide, how strong the evidence is for each default, and how it maps to IMDA, NIST and ASEAN
 templates/     Agent rules, inventory, approval matrix, risk card, incident runbook, launch checklist, filled-in examples
-skills/        preview-then-execute, verify-the-result, session-handover, feature-map
+skills/        setup-agent-rules, preview-then-execute, verify-the-result, session-handover, feature-map
 testing/       The test plan, the dated results, and the harness that produced them
 ```
 
 | Skill | Use it to |
 |---|---|
+| [`setup-agent-rules`](skills/setup-agent-rules/SKILL.md) | Set up `AGENTS.md` in a project by answering a few questions, instead of editing the template by hand |
 | [`preview-then-execute`](skills/preview-then-execute/SKILL.md) | Show the real command, target and effect before an action that changes, sends, deploys or deletes, then wait for approval |
 | [`verify-the-result`](skills/verify-the-result/SKILL.md) | Confirm work succeeded by checking the outcome, not the status message |
 | [`session-handover`](skills/session-handover/SKILL.md) | End a session so the next person or agent can continue, and check old notes before acting on them |
