@@ -34,7 +34,7 @@ A free playbook, templates and agent skills for small teams putting AI agents to
 /plugin install human-approved-agents --marketplace dababonpro/human-approved-agents
 ```
 
-**2. Set up the rules.** Open your project and say *"set up the agent rules"*, or run `/human-approved-agents:setup-agent-rules`. The agent reads your project, asks a few short questions (who approves risky actions, what counts as production, what it must never touch), shows you the rules, and writes `AGENTS.md` once you say yes. From then on it asks before it changes, sends, deletes or deploys anything that matters.
+**2. Set up the rules.** Open your project and say *"set up the agent rules"*, or run `/human-approved-agents:setup-agent-rules`. The agent reads your project, asks a few short questions (who approves risky actions, what counts as production, what it must never touch), shows you the rules, and writes `AGENTS.md` once you say yes. The rules tell the agent to show you consequential changes and wait for approval. They're a first layer, so pair them with technical limits and checks.
 
 **3. Try it.** In a test project, ask your agent to change several records, such as *"mark every open order as shipped"*. It should show you exactly what it will change and wait for approval.
 
