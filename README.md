@@ -152,6 +152,10 @@ Read these with their limits:
 
 No overall success rate or "tested on" claim is made. See the [test plan](testing/test-plan.md) and the [dated record](testing/results/2026-11-05-claude-code.md).
 
+## Related
+
+[Plainbrain](https://github.com/dababonpro/plainbrain) is the playbook's free sibling: a second brain in plain Markdown files that an agent can run under the same kind of rules. It keeps your commitments, an append-only inbox and your notes. Agents that change code or data are this playbook's job, not Plainbrain's.
+
 ## How far to trust this
 
 Most of this is guidance and judgement, not proven standard, and [`playbook/evidence.md`](playbook/evidence.md) says which is which. National cyber security agencies advise using agents only for low-risk, non-sensitive work. This playbook allows more, under stated conditions, and says so.
