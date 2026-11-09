@@ -8,7 +8,7 @@ This is practical guidance. It is not legal advice, and following it does not ma
 
 ## Why Agents Need A Decision From You
 
-Most AI policies cover what people may do with AI. An agent is different, because it acts: it runs commands, changes records and sends messages, sometimes many times a minute. When it gets something wrong, the mistake is already done. Someone has to decide in advance what it may do alone, and who answers for it.
+Most AI policies cover what people may do with AI. An agent is different, because it acts: it runs commands, changes records and sends messages, sometimes many times a minute. If an agent can act without a review gate, it may make a mistake before anyone notices. Someone has to decide in advance what it may do alone, and who answers for it.
 
 ## Five Decisions That Are Yours
 
@@ -27,7 +27,7 @@ Most AI policies cover what people may do with AI. An agent is different, becaus
 - When an agent reports "done", who or what checks that it really is?
 - Which number has it moved since we started?
 
-A team that can answer these in a few minutes is in control. Missing answers are the work.
+These answers give you a starting map. Test the controls before giving the agent more access.
 
 ## Start Small
 

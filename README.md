@@ -107,7 +107,7 @@ There is no level above 3. Agents that choose their own work with nobody supervi
 ## What's included
 
 ```text
-playbook/      The guide, a one-page brief for leaders, how strong the evidence is for each default, and how it maps to IMDA, NIST and ASEAN
+playbook/      The guide, a short brief for leaders, how strong the evidence is for each default, and how it maps to IMDA, NIST and ASEAN
 templates/     Agent rules, inventory, approval matrix, risk card, incident runbook, launch checklist, filled-in examples
 skills/        setup-agent-rules, preview-then-execute, verify-the-result, session-handover, feature-map
 testing/       The test plan, the dated results, and the harness that produced them

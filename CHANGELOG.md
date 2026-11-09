@@ -9,7 +9,7 @@ Public edition 1.0.
 - The skills install as a Claude Code plugin from this repository
 - A `setup-agent-rules` skill that writes `AGENTS.md` from a few questions
 - A five-minute quick start, a hero image and issue templates
-- A one-page brief for leaders, and a Start here by role table in the README
+- A Leader's Brief, and a Start here by role table in the README
 
 ## 0.7.0, unreleased
 
