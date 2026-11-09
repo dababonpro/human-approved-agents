@@ -19,6 +19,13 @@ A free playbook, templates and agent skills for small teams putting AI agents to
 | **Costs** | Free. Guide and templates under CC BY 4.0, skills and code under MIT |
 | **Not covered** | Multi-agent systems, agents that control a desktop or browser, agents that talk to customers on their own, and agents that decide about people |
 
+## Start here by role
+
+| You are | Start with | Then |
+|---|---|---|
+| **A founder, manager or sponsor** deciding whether your team uses agents | [A Leader's Brief](playbook/leaders-brief.md): the decisions that are yours, the questions to ask, and how to start small | Ask your technical lead to run [the first day](#your-first-day) |
+| **A technical lead or operator** setting agents up | [Try it in five minutes](#try-it-in-five-minutes) | [Your first day](#your-first-day), then the [full guide](playbook/playbook.md) |
+
 ## Try it in five minutes
 
 **1. Install the skills.** In Claude Code:
@@ -81,7 +88,7 @@ One agent can read tickets at level 0 and tag them at level 3. Start low.
 
 There is no level above 3. Agents that choose their own work with nobody supervising are out of scope.
 
-## Start here
+## Your first day
 
 1. Read [The Idea In One Page](playbook/playbook.md#the-idea-in-one-page).
 2. Follow [Start Here: Your First Day](playbook/playbook.md#start-here-your-first-day) on one lower-risk project:
@@ -100,7 +107,7 @@ There is no level above 3. Agents that choose their own work with nobody supervi
 ## What's included
 
 ```text
-playbook/      The guide, how strong the evidence is for each default, and how it maps to IMDA, NIST and ASEAN
+playbook/      The guide, a one-page brief for leaders, how strong the evidence is for each default, and how it maps to IMDA, NIST and ASEAN
 templates/     Agent rules, inventory, approval matrix, risk card, incident runbook, launch checklist, filled-in examples
 skills/        setup-agent-rules, preview-then-execute, verify-the-result, session-handover, feature-map
 testing/       The test plan, the dated results, and the harness that produced them
