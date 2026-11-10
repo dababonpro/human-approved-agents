@@ -9,7 +9,7 @@
     {
       "name": "human-approved-agents",
       "source": "./",
-      "description": "Five skills that keep a person in charge of an agent's actions: set up the agent rules, preview before acting, verify the result, hand over a session, and keep a feature map against regressions"
+      "description": "Six skills that keep a person in charge of an agent's actions: set up the playbook or just the agent rules, preview before acting, verify the result, hand over a session, and keep a feature map against regressions"
     }
   ]
 }

@@ -22,7 +22,7 @@ must_stay_true = [
     "The agent rules keep the approval, silence and session check rules",
     "Every skill has a name and description",
 ]
-code = ["templates/**", "skills/preview-then-execute/**", "skills/verify-the-result/**", "skills/session-handover/**", "skills/setup-agent-rules/**", "tools/check_agent_files.py"]
+code = ["templates/**", "skills/preview-then-execute/**", "skills/verify-the-result/**", "skills/session-handover/**", "skills/setup-agent-rules/**", "skills/setup-playbook/**", "tools/check_agent_files.py"]
 proof = ["python tools/check_agent_files.py"]
 
 [[feature]]
