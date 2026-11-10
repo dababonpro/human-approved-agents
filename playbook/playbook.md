@@ -40,6 +40,14 @@ Seven rules hold the whole thing up:
 
 Adopt this on one lower-risk project. Keep the agent reading and drafting only, and use a test environment.
 
+**The quick way.** Paste this into your agent in that project:
+
+> Set up the Human-Approved Agent Playbook in this project. Get it from https://github.com/dababonpro/human-approved-agents (clone it into a temporary folder outside this project), copy its skills into this project, and follow its setup-playbook skill: ask me a few questions, draft the agent rules, inventory, risk card, approval matrix and incident runbook from my answers, and show me the drafts before writing anything. Then tell me the two limits I need to turn on myself and how to test stopping the agent.
+
+It asks a few questions, drafts the files below from your answers, and writes nothing until you approve. Two steps stay with you whichever way you set up: put the two real limits in place, and try the stop method.
+
+**By hand.** The same work, file by file:
+
 | Time | Do this | File |
 |---|---|---|
 | 45 minutes | Name an owner, list the agents, fill in one risk card, send the vendor questions | `agent-inventory.md`, `risk-card.md`, section 12 |
@@ -49,7 +57,7 @@ Adopt this on one lower-risk project. Keep the agent reading and drafting only, 
 | 30 minutes | Fill in the runbook and try the stop method | `incident-runbook.md` |
 | 1 hour | Run one task in test, and see where the rules fail | Testing part of `pre-launch-checklist.md` |
 
-The first day gets you a controlled trial. Spreading it across the company before it has survived real work teaches you nothing.
+After the first day, the agent works on one project under these rules. Keep it there until it has handled real work for a few weeks. Then widen it one step at a time: another project, another person, or access to another system. Widening sooner makes problems harder to spot and trace. Section 15 explains when to take each step.
 
 ## 1. Decide Whether To Use An Agent
 

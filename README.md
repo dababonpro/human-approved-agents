@@ -14,7 +14,7 @@ A free playbook, templates and agent skills for small teams putting AI agents to
 | | |
 |---|---|
 | **For** | Teams of 5 to 50 people with no governance committee and no platform budget, whose people already use coding or office agents |
-| **You get** | A guide, six fill-in templates, five agent skills, and a test harness |
+| **You get** | A guide, six fill-in templates, six agent skills, and a test harness |
 | **First step** | One afternoon on one lower-risk project: about four hours, reading and drafting only, in a test environment |
 | **Costs** | Free. Guide and templates under CC BY 4.0, skills and code under MIT |
 | **Not covered** | Multi-agent systems, agents that control a desktop or browser, agents that talk to customers on their own, and agents that decide about people |
@@ -23,31 +23,34 @@ A free playbook, templates and agent skills for small teams putting AI agents to
 
 | You are | Start with | Then |
 |---|---|---|
-| **A founder, manager or sponsor** deciding whether your team uses agents | [A Leader's Brief](playbook/leaders-brief.md): the decisions that are yours, the questions to ask, and how to start small | Ask your technical lead to run [the first day](#your-first-day) |
-| **A technical lead or operator** setting agents up | [Try it in five minutes](#try-it-in-five-minutes) | [Your first day](#your-first-day), then the [full guide](playbook/playbook.md) |
+| **A founder, manager or sponsor** deciding whether your team uses agents | [A Leader's Brief](playbook/leaders-brief.md): the decisions that are yours, the questions to ask, and how to start small | Ask your technical lead to [set it up](#set-it-up) |
+| **A technical lead or operator** setting agents up | [Set it up](#set-it-up) | The [full guide](playbook/playbook.md) |
 
-## Try it in five minutes
+## Set it up
 
-**1. Install the skills.** In Claude Code:
+Paste this into Claude Code, Codex, Cursor or another agent, in the project you want to protect:
 
 ```text
-/plugin install human-approved-agents --marketplace dababonpro/human-approved-agents
+Set up the Human-Approved Agent Playbook in this project. Get it from https://github.com/dababonpro/human-approved-agents (clone it into a temporary folder outside this project), copy its skills into this project, and follow its setup-playbook skill: ask me a few questions, draft the agent rules, inventory, risk card, approval matrix and incident runbook from my answers, and show me the drafts before writing anything. Then tell me the two limits I need to turn on myself and how to test stopping the agent.
 ```
 
-**2. Set up the rules.** Open your project and say *"set up the agent rules"*, or run `/human-approved-agents:setup-agent-rules`. The agent reads your project, asks a few short questions (who approves risky actions, what counts as production, what it must never touch), shows you the rules, and writes `AGENTS.md` once you say yes. The rules tell the agent to show you consequential changes and wait for approval. They're a first layer, so pair them with technical limits and checks.
+Your agent asks a few questions, drafts the five files from your answers, and writes nothing until you approve.
 
-**3. Try it.** In a test project, ask your agent to change several records, such as *"mark every open order as shipped"*. It should show you exactly what it will change and wait for approval.
+**Then two things only you can do.** Agent rules alone are not enforceable, so these are what make the setup real:
+
+1. **Turn on two real limits:** a read-only key wherever the agent touches production data, and branch protection on your main branch. Your agent gives you the exact steps.
+2. **Try stopping the agent once,** the way your new runbook says.
+
+Then run one real task in a test project and see what the rules catch. Keep it to that one project until it has handled real work for a few weeks; [section 15](playbook/playbook.md#15-a-30-60-and-90-day-rollout) explains when to widen it.
 
 <details>
-<summary>Using Codex, Cursor, Copilot or another agent, or an older Claude Code</summary>
+<summary>Other ways to install</summary>
 
-- **Older Claude Code:** run `/plugin marketplace add dababonpro/human-approved-agents`, then `/plugin install human-approved-agents@dababonpro`.
-- **Any agent that can read the web:** paste this, then answer its questions: *"Read https://raw.githubusercontent.com/dababonpro/human-approved-agents/main/skills/setup-agent-rules/SKILL.md and follow it to set up the agent rules in this project."*
-- **By hand:** copy [`templates/AGENTS.md`](templates/AGENTS.md) to your project root and fill in the `[brackets]`. Copy the folders in [`skills/`](skills/) to where your agent loads skills ([see the table](#where-each-agent-reads-these-files)).
+- **Claude Code plugin:** `/plugin install human-approved-agents --marketplace dababonpro/human-approved-agents`, then say *"set up the human-approved agent playbook"*. On an older Claude Code, run `/plugin marketplace add dababonpro/human-approved-agents`, then `/plugin install human-approved-agents@dababonpro`.
+- **Only the agent rules:** say *"set up the agent rules"* to write `AGENTS.md` alone.
+- **By hand:** follow [the first day in the guide](playbook/playbook.md#start-here-your-first-day), which lists each file to fill in.
 
 </details>
-
-The rules are a first layer, and an agent can still ignore them. Read [the three layers](#the-idea-three-layers) before you trust them with anything you could not afford to lose.
 
 ## The idea: three layers
 
@@ -88,33 +91,18 @@ One agent can read tickets at level 0 and tag them at level 3. Start low.
 
 There is no level above 3. Agents that choose their own work with nobody supervising are out of scope.
 
-## Your first day
-
-1. Read [The Idea In One Page](playbook/playbook.md#the-idea-in-one-page).
-2. Follow [Start Here: Your First Day](playbook/playbook.md#start-here-your-first-day) on one lower-risk project:
-
-   | Time | Do this | Use |
-   |---|---|---|
-   | 45 min | Name an owner, list the agents, fill in one risk card, send the vendor questions | [`agent-inventory.md`](templates/agent-inventory.md), [`risk-card.md`](templates/risk-card.md) |
-   | 30 min | Agree which actions need approval | [`approval-matrix.md`](templates/approval-matrix.md) |
-   | 45 min | Put two real limits in place: a read-only key and branch protection | Section 5 of the guide |
-   | 30 min | Fill in the agent rules and add the skills | [`AGENTS.md`](templates/AGENTS.md), [`skills/`](skills/) |
-   | 30 min | Fill in the runbook and try the stop method | [`incident-runbook.md`](templates/incident-runbook.md) |
-   | 1 hour | Run one task in test, and see where the rules fail | [`pre-launch-checklist.md`](templates/pre-launch-checklist.md) |
-
-3. Then follow the 30, 60 and 90-day rollout in [section 15](playbook/playbook.md#15-a-30-60-and-90-day-rollout): one project, then prove the controls, then decide with evidence.
-
 ## What's included
 
 ```text
 playbook/      The guide, a short brief for leaders, how strong the evidence is for each default, and how it maps to IMDA, NIST and ASEAN
 templates/     Agent rules, inventory, approval matrix, risk card, incident runbook, launch checklist, filled-in examples
-skills/        setup-agent-rules, preview-then-execute, verify-the-result, session-handover, feature-map
+skills/        setup-playbook, setup-agent-rules, preview-then-execute, verify-the-result, session-handover, feature-map
 testing/       The test plan, the dated results, and the harness that produced them
 ```
 
 | Skill | Use it to |
 |---|---|
+| [`setup-playbook`](skills/setup-playbook/SKILL.md) | Set up the whole playbook in a project from one interview: rules, inventory, risk card, approvals and runbook, written after you approve |
 | [`setup-agent-rules`](skills/setup-agent-rules/SKILL.md) | Set up `AGENTS.md` in a project by answering a few questions, instead of editing the template by hand |
 | [`preview-then-execute`](skills/preview-then-execute/SKILL.md) | Show the real command, target and effect before an action that changes, sends, deploys or deletes, then wait for approval |
 | [`verify-the-result`](skills/verify-the-result/SKILL.md) | Confirm work succeeded by checking the outcome, not the status message |
