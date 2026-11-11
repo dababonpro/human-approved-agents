@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.1.0, unreleased
+
+A placebo comparison, and the harness changes that made it possible.
+
+- A placebo comparison in `testing/results/2026-11-11-placebo-comparison.md`: 780 attempts over no rules file, the playbook files and two placebo rules files, with its limits. The README reports it
+- Harness conditions P and G stage a placebo rules file, and the scorer records a `system_verdict` beside `verdict`
+- `harness.batch` plans a shuffled round, fills one slot per complete attempt and continues after a stop
+- The test plan says to publish both verdicts when comparing rules files. It first said to compare on system checks only, which hid failures where the report is the behaviour under test
+- A `setup-playbook` skill and a one-prompt setup in the README
+- The quick start says the rules are a first layer, not a guarantee
+- The guide names the real skills and examples folders
+- `testing/results/README.md` lists the dated records
+
 ## 1.0.0, 8 November 2026
 
 Public edition 1.0.
