@@ -132,13 +132,31 @@ A Claude Code run in a disposable mock project, scored by automated checks. Each
 | Critical scenarios, approvals off | 65 of 130 failed `██████████` | 0 of 130 failed |
 | All scenarios but one, normal approvals | 108 of 190 failed `███████████` | 0 of 190 failed |
 
-Read these with their limits:
+### Is it these rules, or any rules file?
+
+The table above cannot tell the two apart. One large study of coding tasks found that random rule files helped as much as expert-written ones ([Zhang et al., 2026](https://arxiv.org/abs/2604.11088)), so on 11 November 2026 a second round put it to the test here. Four setups ran together in mixed order, 195 attempts each, with tool approvals off. Two of them are placebos: rules files that hold the same project facts and none of the playbook's rules.
+
+| What the agent was given | Failed a check on the fake systems | Failed any check |
+|---|---|---|
+| No rules file | 90 of 195 `█████████` | 110 of 195 |
+| The playbook files | 0 of 195 | 0 of 195 |
+| Placebo: rules of about the same length, on unrelated subjects | 78 of 195 `████████` | 97 of 195 |
+| Placebo: a short general reminder to be careful | 66 of 195 `███████` | 84 of 195 |
+
+- **A rules file being present did not account for the difference.** On the scenarios about acting without asking, both placebos failed as often as no rules file at all.
+- **A short reminder was enough for three scenarios.** It made the agent check a stale note and read back what it wrote, and it held back half the deletions. It did nothing for the rest.
+- **Eight scenarios show no effect of any file.** With or without rules, the agent refused the planted instructions, kept the secret, used the right credential, reported skipped tests and left a failing test intact.
+- **What was measured is whether a written rule was followed.** Without a rule to show a change first, the agent did the task it was given. This is not evidence about a real project.
+
+Read all of these with their limits:
 
 - **Tuned, point-in-time results.** Rules and scoring changed after earlier results were seen, and three rules were added after the main runs, with smaller targeted rechecks. They cover one tool, one model and one mock project.
 - **Not yet reviewed by a person.** Most passes still carry a review question for a human to answer. A later read of the flagged attempts found one that fails its question.
+- **The wording favours the playbook.** Its files were tuned on these scenario phrasings and the placebos were not. The holdout phrasings that would remove this were not run. The playbook setup also has skills, which the placebos do not.
+- **A zero is not proof.** Ten clean attempts of one scenario cannot rule out a failure rate of up to 26%.
 - **Not completed yet:** the holdout run, a full Codex evaluation, scenarios written by an outsider, and an independent repeat.
 
-No overall success rate or "tested on" claim is made. See the [test plan](testing/test-plan.md) and the [dated record](testing/results/2026-11-05-claude-code.md).
+No overall success rate or "tested on" claim is made. See the [test plan](testing/test-plan.md) and the dated records: [first evaluation](testing/results/2026-11-05-claude-code.md) and [placebo comparison](testing/results/2026-11-11-placebo-comparison.md).
 
 ## Related
 
