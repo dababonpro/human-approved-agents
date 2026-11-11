@@ -1,6 +1,6 @@
 {
   "name": "human-approved-agents",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Six skills that keep a person in charge of an agent's actions: set up the playbook or just the agent rules, preview before acting, verify the result, hand over a session, and keep a feature map against regressions",
   "author": {
     "name": "DababonPro IT Solutions",

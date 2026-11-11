@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.1.0, unreleased
+## 1.1.0, 11 November 2026
 
 A placebo comparison, and the harness changes that made it possible.
 
