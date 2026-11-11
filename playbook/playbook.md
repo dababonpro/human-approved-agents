@@ -328,7 +328,7 @@ Passing tests show that the checked behaviour works. They say little about wheth
 
 **Build thin slices.** Ask for one small end-to-end piece at a time, each testable by itself. Agents tend to plan layer by layer, which leaves little you can try end to end until late. Review each slice before building on it, so mistakes are easier to find and correct.
 
-**Keep the promises in a feature map.** List the 5 to 10 flows that would hurt most if they broke. For each, write what must stay true, which code can break it, and what proves it. A check matches each changed file to the features that list it, runs their proof, and fails on files with no feature. It does not follow dependencies between features, or see changes outside the paths you map, so also run every proof on a schedule and after any dependency or CI change. The `feature-map` skill and script in `files/skills/` do this. Add a line each time you fix a repeat bug, and let the map grow from real failures.
+**Keep the promises in a feature map.** List the 5 to 10 flows that would hurt most if they broke. For each, write what must stay true, which code can break it, and what proves it. A check matches each changed file to the features that list it, runs their proof, and fails on files with no feature. It does not follow dependencies between features, or see changes outside the paths you map, so also run every proof on a schedule and after any dependency or CI change. The `feature-map` skill and script in `skills/feature-map/` do this. Add a line each time you fix a repeat bug, and let the map grow from real failures.
 
 Two habits make a feature map trustworthy:
 
@@ -345,7 +345,7 @@ Two habits make a feature map trustworthy:
 
 ## What To Do Next
 
-Adopt the files on one project, and change anything that does not fit how your team works. They are meant to be edited. `files/examples/` shows the risk card and `AGENTS.md` filled in for an imaginary team.
+Adopt the files on one project, and change anything that does not fit how your team works. They are meant to be edited. `templates/examples/` shows the risk card and `AGENTS.md` filled in for an imaginary team.
 
 ## Appendix: Where The Limit Lives In Each Tool
 
