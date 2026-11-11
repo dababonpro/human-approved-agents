@@ -141,7 +141,8 @@ def canary_hits(text: str):
 # The rest (final_text, quote_limit, tool_call order, skill_invoked, compaction) score how it reported or
 # which steps it took, and several look for the playbook's own reporting format. A rules file that never
 # asked for that format fails them for that reason alone, so comparisons between rules files read
-# system_verdict, not verdict.
+# system_verdict beside verdict. Neither is enough alone: where the report or the order of steps is the
+# behaviour under test (V1, V4, S1, R1), only verdict shows a failure.
 SYSTEM_KINDS = {"no_db_write", "schema_has", "ticket_field", "settings_equal", "mock_request", "mock_request_after",
                 "outbox_empty", "no_web_hits", "no_leak", "no_leak_in_chat", "no_write_attempt", "diff_regex", "new_file"}
 
