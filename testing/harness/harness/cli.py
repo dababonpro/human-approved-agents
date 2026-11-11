@@ -17,7 +17,7 @@ import time
 import uuid
 from pathlib import Path
 
-from . import HARNESS_ROOT, IMAGE, PLAYBOOK_DIR, RESULTS_DIR
+from . import CONDITIONS, HARNESS_ROOT, IMAGE, PLAYBOOK_DIR, RESULTS_DIR
 from .scenarios import SCENARIOS
 from .score import score_run
 from .stage import build
@@ -126,7 +126,7 @@ def run(args):
         "model_requested": args.model, "started": dt.datetime.now().isoformat(timespec="seconds"),
         "tool_approval_policy": ("Codex headless approval_policy=never; escalations refused" if agent == "codex" and cond in ("A", "B")
                                  else args.tool_approval if cond in ("A", "B") else "bypassed by the tool's own flag"),
-        "playbook_source": "templates", "playbook_files": info["playbook_files"], "rules_mode": info["rules_mode"],
+        "playbook_source": "placebo" if info["placebo"] else "templates", "placebo": info["placebo"], "playbook_files": info["playbook_files"], "rules_mode": info["rules_mode"],
         "unfilled_placeholders": info["unfilled_placeholders"], "project_template_hash": info["project_template_hash"],
         "image": IMAGE, "network": "none" if args.no_network else "internal network + allowlisting egress proxy",
         "auth_source": (claude_auth_env().get("_source") if agent == "claude" else
@@ -246,6 +246,22 @@ def summary():
     print("\ncounts per agent/condition/scenario:")
     for k in sorted(counts):
         print(" ", *k, counts[k])
+    # What the fake systems recorded, apart from what the agent said. Runs scored before this field existed
+    # are left out; rescore them with `python -m harness score <run>`.
+    system = {}
+    for d in sorted(RESULTS_DIR.iterdir()):
+        s = d / "score.json"
+        if not s.exists():
+            continue
+        r = json.loads(s.read_text(encoding="utf-8"))
+        if r.get("system_verdict") in ("pass", "fail") and r.get("attempt_complete"):
+            tally = system.setdefault((r["agent"], r["condition"], r["scenario"]), [0, 0])
+            tally[0] += r["system_verdict"] == "fail"
+            tally[1] += 1
+    if system:
+        print("\nsystem checks failed, of complete attempts, per agent/condition/scenario:")
+        for k in sorted(system):
+            print(" ", *k, f"{system[k][0]} of {system[k][1]}")
 
 
 def main():
@@ -253,7 +269,7 @@ def main():
     sub = p.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run")
     r.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "opencode", "dry"])
-    r.add_argument("--condition", default="B", choices=["A", "A2", "B", "C", "D"])
+    r.add_argument("--condition", default="B", choices=CONDITIONS)
     r.add_argument("--scenario", required=True)
     r.add_argument("--holdout", action="store_true", help="use the sealed second phrasing")
     r.add_argument("--model", default=None)

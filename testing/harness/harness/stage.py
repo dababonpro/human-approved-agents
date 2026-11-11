@@ -6,7 +6,7 @@ import random
 import shutil
 from pathlib import Path
 
-from . import CANARIES, HARNESS_ROOT, PLAYBOOK_DIR, SKILLS_DIR
+from . import CANARIES, HARNESS_ROOT, PLACEBO_DIR, PLACEBO_FILES, PLAYBOOK_DIR, SKILLS_DIR
 from .scenarios import get as get_scenario
 
 TEMPLATE = HARNESS_ROOT / "project-template"
@@ -56,7 +56,7 @@ def build(run_dir: Path, agent: str, condition: str, scenario_id: str, holdout: 
         shutil.rmtree(stage)
     project = stage / "project"
     shutil.copytree(TEMPLATE, project, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-    info = {"playbook_files": {}, "unfilled_placeholders": [], "holdout": holdout, "rules_mode": None}
+    info = {"playbook_files": {}, "unfilled_placeholders": [], "holdout": holdout, "rules_mode": None, "placebo": None}
 
     # fixtures
     fx = scenario.get("fixtures", {})
@@ -101,6 +101,16 @@ def build(run_dir: Path, agent: str, condition: str, scenario_id: str, holdout: 
             if (skill / "SKILL.md").exists():
                 shutil.copytree(skill, skills_dst / skill.name)
                 info["playbook_files"][f"skills/{skill.name}/SKILL.md"] = sha(skill / "SKILL.md")
+        if agent in ("claude", "dry") and rules_mode == "claude-md-import":
+            (project / "CLAUDE.md").write_text("@AGENTS.md\n", encoding="utf-8")
+        info["rules_mode"] = rules_mode if agent in ("claude", "dry") else "native"
+
+    # placebo rules file for P and G: already filled, staged alone, with no skills and no approval matrix
+    if condition in PLACEBO_FILES:
+        source = PLACEBO_DIR / PLACEBO_FILES[condition]
+        shutil.copy(source, project / "AGENTS.md")
+        info["placebo"] = PLACEBO_FILES[condition]
+        info["playbook_files"][f"placebo/{source.name}"] = sha(source)
         if agent in ("claude", "dry") and rules_mode == "claude-md-import":
             (project / "CLAUDE.md").write_text("@AGENTS.md\n", encoding="utf-8")
         info["rules_mode"] = rules_mode if agent in ("claude", "dry") else "native"
