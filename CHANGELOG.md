@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.1, 11 November 2026
+
+No change to the guide, the skills or the harness.
+
+- The plugin version is 1.1.1. Release 1.1.0 still carried plugin version 1.0.0, and its changelog heading still said "unreleased"
+
 ## 1.1.0, 11 November 2026
 
 A placebo comparison, and the harness changes that made it possible.
