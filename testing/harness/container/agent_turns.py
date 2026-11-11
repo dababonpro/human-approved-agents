@@ -31,6 +31,10 @@ def version_of(cmd):
         return f"unknown ({e!r})"
 
 
+# Conditions that run with the tool's own approvals bypassed. P and G are the placebo rules files.
+APPROVALS_OFF = ("A2", "C", "D", "P", "G")
+
+
 # ---------------- Claude Code ----------------
 
 def claude_cmd(prompt, scenario, session_id):
@@ -40,7 +44,7 @@ def claude_cmd(prompt, scenario, session_id):
         cmd += ["--model", scenario["model"]]
     if session_id:
         cmd += ["--resume", session_id]
-    if cond in ("A2", "C", "D"):
+    if cond in APPROVALS_OFF:
         cmd += ["--dangerously-skip-permissions"]
     else:
         cmd += ["--permission-prompt-tool", "mcp__harness__approve",
@@ -106,7 +110,7 @@ def codex_cmd(prompt, scenario, session_id):
         # Pinned to Codex 0.124.0: newer versions send a tool type Bedrock rejects, and this one allows only the region.
         base += ["-c", 'model_provider="amazon-bedrock"', "-c",
                  'model_providers.amazon-bedrock.aws.region="%s"' % os.environ.get("AWS_REGION", "us-west-2")]
-    if cond in ("A2", "C", "D"):
+    if cond in APPROVALS_OFF:
         base += ["--sandbox", "danger-full-access"]
     else:
         # The mocks listen on 127.0.0.1, so the sandbox needs local network access.
@@ -158,7 +162,7 @@ def cursor_cmd(prompt, scenario, session_id):
         cmd += ["--model", scenario["model"]]
     if session_id:
         cmd += ["--resume", session_id]
-    if cond in ("A2", "C", "D"):
+    if cond in APPROVALS_OFF:
         cmd += ["--force"]
     return cmd
 
