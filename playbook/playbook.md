@@ -223,6 +223,7 @@ An approval only protects you if someone reads it. People who see many prompts s
 - **Look at the numbers monthly.** Check how often approvers change or reject a request, and how fast they answer. If nobody ever says no, the approval may have stopped working. No published threshold exists, so watch for change.
 - **Test the reviewers.** Now and then, plant a harmless fault and see if it gets caught.
 - **Do not add prompts to fix prompts.** If they arrive faster than someone can read them, tighten the limit instead.
+- **State both sides of the trade-off.** A one-sided rule ("avoid acting without asking") pushes an agent to ask on safe, reversible steps too, which trains people to click yes without reading. Say both what an unapproved change costs and what interrupting routine, allowed work costs, and keep ambiguity questions ("what did you mean?") separate from risk approvals ("may I run this command?").
 
 A reviewer who is getting faster may be getting better, or may have stopped looking. Do not treat falling review time as a pure gain.
 
@@ -310,7 +311,7 @@ Stopping an agent is not retiring it. Keys, memory, schedules and downstream job
 
 **Days 61 to 90: Decide with evidence.** Compare with the baseline, consider raising one well-understood action, and decide what to stop, continue and expand.
 
-**Every quarter after that:** review rules, levels, measures, risk cards, inventory and vendors, and run a drill.
+**Every quarter after that:** review rules, levels, measures, risk cards, inventory and vendors, and run a drill. Remove rules that compensate for limits a newer model no longer has: in our placebo round, eight scenarios passed in every attempt with no rules file at all.
 
 ## 16. Protect The Codebase
 

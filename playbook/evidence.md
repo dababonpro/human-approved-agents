@@ -42,6 +42,7 @@ Checked 1 November 2026, with the section 16 rows added 2 November 2026. This sh
 | Measure speed and stability together | **Survey-backed** | DORA 2025 | Correlation, not causation |
 | Measure from systems, not impressions | **Experiment-backed** | METR randomised trial, early 2025 (preprint) | A small study of experienced developers on early-2025 tools. Later estimates are uncertain |
 | Planted faults and written reasons for reviewers | **Written reasons: backed by guidance. Planted faults: partly backed** | IMDA v1.5 §2.2.2 p29 (written justification on high-risk approvals), Buçinca et al. on making people think first | No agent study, and no source for planted faults |
+| State both sides of an approval trade-off, and retire rules the model no longer needs | **Vendor guidance, and our own baseline data** | Anthropic Code w/ Claude 2026 sessions (*The prompting playbook*, *The expanding toolkit*) and *Best practices for Claude Code*; Google Agent Development Kit (`RequestInput` vs. tool confirmations). In this playbook's placebo round, 8 of 25 scenarios passed every attempt in A2 (no rules file) | Not yet tested as its own arm in our harness |
 | Risk card | **Backed by guidance** | ASEAN Guide Annex A, NIST AI 100-1 GOVERN and MAP, IMDA v1.5 §2.1 | The format is ours |
 | Retirement steps | **Backed by guidance** | NIST AI 100-1 GOVERN 1.7 and MANAGE 4.1, NIST AI 600-1 | Nothing material |
 | Vendor questions | **Backed by guidance** | IMDA v1.5 §2.2.1, NIST AI 600-1 GV-6.1 and GV-6.2 | The list is ours |

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Section 8 of the guide advises stating both sides of an approval trade-off and separating ambiguity questions from risk approvals, so one-sided caution rules do not cause approval fatigue
+- Section 15 advises retiring rules that compensate for limits a newer model no longer has, citing the eight scenarios that passed every attempt without rules in the placebo round
+- `playbook/evidence.md` records the evidence and limits behind both additions
+
 ## 1.1.1, 11 November 2026
 
 No change to the guide, the skills or the harness.
