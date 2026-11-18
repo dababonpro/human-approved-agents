@@ -148,7 +148,7 @@ def main() -> int:
     a.add_argument("--seed", type=int, required=True)
     b = sub.add_parser("run")
     b.add_argument("--name", required=True)
-    b.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "opencode", "dry"])
+    b.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "opencode", "dry", "agy"])
     b.add_argument("--model", default=None)
     b.add_argument("--limit", type=int, default=0, help="stop after this many slots")
     c = sub.add_parser("status")

@@ -237,12 +237,119 @@ def opencode_parse(path):
             "compactions": 0, "usage": usage}
 
 
+# ---------------- Antigravity CLI (agy) ----------------
+
+def agy_cmd(prompt, scenario, session_id):
+    cond = scenario["condition"]
+    cmd = ["agy", "-p", prompt, "--output-format", "stream-json"]
+    if scenario.get("model"):
+        cmd += ["--model", scenario["model"]]
+    if session_id:
+        cmd += ["--conversation", session_id]
+    if cond in APPROVALS_OFF:
+        cmd += ["--dangerously-skip-permissions"]
+    return cmd
+
+
+def agy_parse(path):
+    session_id, final_parts, tool_calls = None, [], []
+    tool_calls_by_index = {}
+    usage = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0}
+    model = None
+    is_error = False
+    result_text = None
+    with path.open(encoding="utf-8", errors="replace") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                ev = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            ev_type = ev.get("event") or ev.get("type")
+            session_id = ev.get("conversation_id") or ev.get("session_id") or session_id
+            if ev_type == "init":
+                init_data = ev.get("init") if isinstance(ev.get("init"), dict) else {}
+                model = init_data.get("model") or ev.get("model") or model
+                session_id = ev.get("conversation_id") or session_id
+            elif ev_type in ("step_update", "step"):
+                step_data = ev.get("step_update") if isinstance(ev.get("step_update"), dict) else ev
+                st = step_data.get("step_type")
+                tool_name = step_data.get("tool_name")
+                state = step_data.get("state")
+                idx = step_data.get("step_index")
+                if (st in ("tool", "tool_use", "tool_call") or tool_name or step_data.get("tool")) and state in ("ACTIVE", "DONE"):
+                    name = tool_name or step_data.get("tool") or step_data.get("name") or "tool"
+                    tinfo = step_data.get("tool_info") if isinstance(step_data.get("tool_info"), dict) else {}
+                    params = tinfo.get("parameters") or step_data.get("input") or step_data.get("args") or {}
+                    if not isinstance(params, dict):
+                        params = {"value": str(params)}
+                    else:
+                        params = dict(params)
+                    if "CommandLine" in params and "command" not in params:
+                        params["command"] = params["CommandLine"]
+                    if "Path" in params and "file_path" not in params:
+                        params["file_path"] = params["Path"]
+                    if "Content" in params and "content" not in params:
+                        params["content"] = params["Content"]
+                    if "Replacement" in params and "new_string" not in params:
+                        params["new_string"] = params["Replacement"]
+                    if "Target" in params and "old_string" not in params:
+                        params["old_string"] = params["Target"]
+                    if idx is not None and idx in tool_calls_by_index:
+                        existing = tool_calls_by_index[idx]
+                        if not existing.get("input") and params:
+                            existing["input"] = params
+                    else:
+                        entry = {"name": name, "input": params}
+                        if idx is not None:
+                            tool_calls_by_index[idx] = entry
+                        tool_calls.append(entry)
+                delta = step_data.get("text_delta") or step_data.get("text")
+                if delta:
+                    final_parts.append(delta)
+                tok = step_data.get("usage") or {}
+                if tok:
+                    usage["input_tokens"] = int(tok.get("input_tokens") or usage["input_tokens"])
+                    usage["output_tokens"] = int(tok.get("output_tokens") or usage["output_tokens"])
+            elif ev_type == "result":
+                res_data = ev.get("result") if isinstance(ev.get("result"), dict) else ev
+                session_id = res_data.get("conversation_id") or session_id
+                result_text = res_data.get("response") or res_data.get("result")
+                if res_data.get("status") == "ERROR" or res_data.get("is_error") or res_data.get("error"):
+                    is_error = True
+                    result_text = result_text or str(res_data.get("error"))
+                tok = res_data.get("usage") or {}
+                if tok:
+                    usage["input_tokens"] = int(tok.get("input_tokens") or usage["input_tokens"])
+                    usage["output_tokens"] = int(tok.get("output_tokens") or usage["output_tokens"])
+                    usage["cached_input_tokens"] = int(tok.get("cache_read_tokens") or 0)
+            elif ev_type == "assistant":
+                for block in ev.get("message", {}).get("content", []) or []:
+                    if block.get("type") == "tool_use":
+                        tool_calls.append({"name": block.get("name"), "input": block.get("input"), "id": block.get("id")})
+                    elif block.get("type") == "text":
+                        final_parts.append(block.get("text", ""))
+    final = result_text if result_text is not None else "".join(final_parts)
+    return {
+        "session_id": session_id,
+        "final_text": final,
+        "tool_calls": tool_calls,
+        "compactions": 0,
+        "usage": usage,
+        "model": model,
+        "is_error": is_error,
+    }
+
+
 ADAPTERS = {
     "claude": (claude_cmd, claude_parse, ["claude", "--version"]),
     "dry": (dry_cmd, claude_parse, ["python3", "--version"]),
     "codex": (codex_cmd, codex_parse, ["codex", "--version"]),
     "cursor": (cursor_cmd, cursor_parse, ["agent", "--version"]),
     "opencode": (opencode_cmd, opencode_parse, ["opencode", "--version"]),
+    "agy": (agy_cmd, agy_parse, ["agy", "--version"]),
 }
 
 
