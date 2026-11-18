@@ -74,15 +74,10 @@ def codex_auth_file() -> Path | None:
 
 def antigravity_auth() -> dict:
     """Credentials for Antigravity inside the container. Never printed, never written under results/."""
-    for name in ("GEMINI_API_KEY_OLD", "GEMINI_API_KEY", "ANTIGRAVITY_API_KEY"):
+    for name in ("GEMINI_API_KEY", "ANTIGRAVITY_API_KEY"):
         if os.environ.get(name):
             return {"env": {"GEMINI_API_KEY": os.environ[name]}, "source": f"host env {name}"}
-    env_candidates = [
-        Path.cwd() / ".env",
-        HARNESS_ROOT / ".env",
-        HARNESS_ROOT.parent / ".env",
-        Path.home() / ".env",
-    ]
+    env_candidates = [HARNESS_ROOT / ".env"]
     if os.environ.get("ENV_FILE"):
         env_candidates.insert(0, Path(os.environ["ENV_FILE"]))
     for env_path in env_candidates:
@@ -95,7 +90,7 @@ def antigravity_auth() -> dict:
                         continue
                     k, v = line.split("=", 1)
                     env_dict[k.strip()] = v.strip().strip('"').strip("'")
-                for key_name in ("GEMINI_API_KEY_OLD", "GEMINI_API_KEY", "ANTIGRAVITY_API_KEY"):
+                for key_name in ("GEMINI_API_KEY", "ANTIGRAVITY_API_KEY"):
                     if env_dict.get(key_name):
                         return {"env": {"GEMINI_API_KEY": env_dict[key_name]}, "source": f"{env_path} ({key_name})"}
             except OSError:
@@ -134,6 +129,8 @@ def run(args):
     agent, cond, sid = args.agent, args.condition.upper(), args.scenario.upper()
     if sid not in SCENARIOS:
         sys.exit(f"unknown scenario {sid}")
+    if agent == "agy" and cond in ("A", "B"):
+        sys.exit("agy has no headless approval stand-in for conditions A and B; run A2, C, D, P or G")
     ensure_image(args.rebuild_image)
     run_id = f"{dt.datetime.now():%Y%m%d-%H%M%S}-{agent}-{cond}-{sid}" + ("-holdout" if args.holdout else "") + f"-{uuid.uuid4().hex[:4]}"
     run_dir = RESULTS_DIR / run_id
@@ -145,6 +142,7 @@ def run(args):
 
     # environment for the agent
     env = {}
+    agy_auth = {}
     if agent == "claude":
         auth = claude_auth_env()
         if not auth and not args.allow_no_auth:
@@ -167,11 +165,11 @@ def run(args):
     elif agent == "cursor" and os.environ.get("CURSOR_API_KEY"):
         env["CURSOR_API_KEY"] = os.environ["CURSOR_API_KEY"]
     elif agent == "agy":
-        auth = antigravity_auth()
-        if not auth and not args.allow_no_auth:
+        agy_auth = antigravity_auth()
+        if not agy_auth and not args.allow_no_auth:
             shutil.rmtree(run_dir)
             sys.exit("no Antigravity credentials; run `python -m harness auth-check`")
-        env.update(auth.get("env", {}))
+        env.update(agy_auth.get("env", {}))
     env["HARNESS_TOOL_APPROVAL"] = args.tool_approval
     env["HARNESS_PERMISSION_LOG"] = "/harness/out/permission-log.jsonl"
     if args.model:
@@ -187,7 +185,7 @@ def run(args):
         "image": IMAGE, "network": "none" if args.no_network else "internal network + allowlisting egress proxy",
         "auth_source": (claude_auth_env().get("_source") if agent == "claude" else
                         "~/.codex/auth.json (read-only mount)" if agent == "codex" and not os.environ.get("OPENAI_API_KEY") else
-                        antigravity_auth().get("source") if agent == "agy" else None),
+                        agy_auth.get("source") if agent == "agy" else None),
     }
     (run_dir / "record.json").write_text(json.dumps(record, indent=1), encoding="utf-8")
 
@@ -221,7 +219,7 @@ def run(args):
         if agent == "codex" and args.provider != "bedrock" and not os.environ.get("OPENAI_API_KEY"):
             cmd[-1:-1] = ["-v", f"{codex_auth_file()}:/home/agent/.codex/auth.json:ro"]
         if agent == "agy":
-            agy_file = antigravity_auth().get("file")
+            agy_file = agy_auth.get("file")
             if agy_file:
                 cmd[-1:-1] = ["-v", f"{agy_file}:/home/agent/.gemini/oauth_creds.json:ro"]
         print(f"running {run_id} ...", flush=True)

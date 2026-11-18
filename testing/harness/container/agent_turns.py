@@ -3,11 +3,12 @@
 unprivileged user. Reads /harness/stage/scenario.json, writes per-turn
 transcripts and turns.json to /harness/out.
 
-Agents: claude (Claude Code), codex (OpenAI Codex CLI), cursor (Cursor CLI).
-Only the claude adapter has been exercised; see SCRATCH-LOG.md in the harness.
+Agents: claude (Claude Code), codex (OpenAI Codex CLI), cursor (Cursor CLI),
+opencode (OpenCode), agy (Antigravity CLI, approvals-off conditions only).
 """
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -239,15 +240,50 @@ def opencode_parse(path):
 
 # ---------------- Antigravity CLI (agy) ----------------
 
+AGY_TOOL_NAMES = {
+    "run_command": "Bash",
+    "edit_file": "Edit",
+    "write_file": "Write",
+    "read_file": "Read",
+    "multi_edit": "MultiEdit",
+    "replace_file_content": "Edit",
+    "multi_replace_file_content": "MultiEdit",
+    "write_to_file": "Write",
+}
+_AGY_SKILL_PATH = re.compile(r"(?:^|[\\/])\.agents[\\/]skills[\\/]([^\\/]+)[\\/]SKILL\.md$", re.IGNORECASE)
+
+
+def _agy_normalize_call(raw_name, raw_params):
+    params = dict(raw_params) if isinstance(raw_params, dict) else ({"value": str(raw_params)} if raw_params is not None else {})
+    if "CommandLine" in params and "command" not in params:
+        params["command"] = params["CommandLine"]
+    if "Path" in params and "file_path" not in params:
+        params["file_path"] = params["Path"]
+    if "Content" in params and "content" not in params:
+        params["content"] = params["Content"]
+    if "Replacement" in params and "new_string" not in params:
+        params["new_string"] = params["Replacement"]
+    if "Target" in params and "old_string" not in params:
+        params["old_string"] = params["Target"]
+    name = AGY_TOOL_NAMES.get(raw_name, raw_name)
+    if name == "Read":
+        fp = params.get("file_path") or ""
+        m = _AGY_SKILL_PATH.search(str(fp))
+        if m:
+            name = "Skill"
+            params.setdefault("skill", m.group(1))
+    return name, params
+
+
 def agy_cmd(prompt, scenario, session_id):
     cond = scenario["condition"]
-    cmd = ["agy", "-p", prompt, "--output-format", "stream-json"]
+    if cond not in APPROVALS_OFF:
+        raise ValueError(f"agy has no headless approval stand-in for condition {cond}; use one of {APPROVALS_OFF}")
+    cmd = ["agy", "-p", prompt, "--output-format", "stream-json", "--dangerously-skip-permissions"]
     if scenario.get("model"):
         cmd += ["--model", scenario["model"]]
     if session_id:
         cmd += ["--conversation", session_id]
-    if cond in APPROVALS_OFF:
-        cmd += ["--dangerously-skip-permissions"]
     return cmd
 
 
@@ -280,26 +316,14 @@ def agy_parse(path):
                 state = step_data.get("state")
                 idx = step_data.get("step_index")
                 if (st in ("tool", "tool_use", "tool_call") or tool_name or step_data.get("tool")) and state in ("ACTIVE", "DONE"):
-                    name = tool_name or step_data.get("tool") or step_data.get("name") or "tool"
+                    raw_name = tool_name or step_data.get("tool") or step_data.get("name") or "tool"
                     tinfo = step_data.get("tool_info") if isinstance(step_data.get("tool_info"), dict) else {}
-                    params = tinfo.get("parameters") or step_data.get("input") or step_data.get("args") or {}
-                    if not isinstance(params, dict):
-                        params = {"value": str(params)}
-                    else:
-                        params = dict(params)
-                    if "CommandLine" in params and "command" not in params:
-                        params["command"] = params["CommandLine"]
-                    if "Path" in params and "file_path" not in params:
-                        params["file_path"] = params["Path"]
-                    if "Content" in params and "content" not in params:
-                        params["content"] = params["Content"]
-                    if "Replacement" in params and "new_string" not in params:
-                        params["new_string"] = params["Replacement"]
-                    if "Target" in params and "old_string" not in params:
-                        params["old_string"] = params["Target"]
+                    raw_params = tinfo.get("parameters") or step_data.get("input") or step_data.get("args") or {}
+                    name, params = _agy_normalize_call(raw_name, raw_params)
                     if idx is not None and idx in tool_calls_by_index:
                         existing = tool_calls_by_index[idx]
                         if not existing.get("input") and params:
+                            existing["name"] = name
                             existing["input"] = params
                     else:
                         entry = {"name": name, "input": params}
@@ -328,7 +352,8 @@ def agy_parse(path):
             elif ev_type == "assistant":
                 for block in ev.get("message", {}).get("content", []) or []:
                     if block.get("type") == "tool_use":
-                        tool_calls.append({"name": block.get("name"), "input": block.get("input"), "id": block.get("id")})
+                        name, params = _agy_normalize_call(block.get("name"), block.get("input"))
+                        tool_calls.append({"name": name, "input": params, "id": block.get("id")})
                     elif block.get("type") == "text":
                         final_parts.append(block.get("text", ""))
     final = result_text if result_text is not None else "".join(final_parts)

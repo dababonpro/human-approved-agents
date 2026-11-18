@@ -31,6 +31,8 @@ def batch_file(name: str):
 
 
 def build_schedule(conditions: list[str], seed: int, attempts: int | None = None) -> list[dict]:
+    if attempts is not None and attempts <= 0:
+        raise ValueError("attempts must be a positive integer")
     slots = []
     for condition in conditions:
         for sid, scenario in SCENARIOS.items():
@@ -60,13 +62,18 @@ def save(name: str, batch: dict) -> None:
 
 
 def plan(args) -> int:
+    if args.attempts is not None and args.attempts <= 0:
+        sys.exit("--attempts must be a positive integer")
     path = batch_file(args.name)
     if path.exists():
         sys.exit(f"{path.name} already exists. A schedule is written once; pick another name.")
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     slots = build_schedule(args.conditions, args.seed, attempts=args.attempts)
-    save(args.name, {"name": args.name, "conditions": args.conditions, "seed": args.seed,
-                     "planned": time.strftime("%Y-%m-%dT%H:%M:%S"), "slots": slots})
+    data = {"name": args.name, "conditions": args.conditions, "seed": args.seed,
+            "planned": time.strftime("%Y-%m-%dT%H:%M:%S"), "slots": slots}
+    if args.attempts is not None:
+        data["attempts"] = args.attempts
+    save(args.name, data)
     per = {c: sum(1 for s in slots if s["condition"] == c) for c in args.conditions}
     print(f"planned {len(slots)} attempts: {per}")
     return 0
@@ -91,6 +98,10 @@ def attempt(slot: dict, args) -> tuple[str | None, dict | None]:
 def run(args) -> int:
     batch = load(args.name)
     open_slots = [s for s in batch["slots"] if not s["run_id"]]
+    if args.agent == "agy":
+        unsupported = sorted({s["condition"] for s in open_slots if s["condition"] in ("A", "B")})
+        if unsupported:
+            sys.exit(f"agy has no headless approval stand-in for conditions {', '.join(unsupported)}; use A2, C, D, P or G")
     if args.limit:
         open_slots = open_slots[:args.limit]
     print(f"{len(open_slots)} slot(s) to run of {len(batch['slots'])}", flush=True)
