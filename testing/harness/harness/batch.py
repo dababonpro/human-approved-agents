@@ -30,13 +30,14 @@ def batch_file(name: str):
     return RESULTS_DIR / f"batch-{name}.json"
 
 
-def build_schedule(conditions: list[str], seed: int) -> list[dict]:
+def build_schedule(conditions: list[str], seed: int, attempts: int | None = None) -> list[dict]:
     slots = []
     for condition in conditions:
         for sid, scenario in SCENARIOS.items():
             if scenario.get("conditions") and condition not in scenario["conditions"]:
                 continue
-            for attempt in range(1, ATTEMPTS.get(scenario["severity"], DEFAULT_ATTEMPTS) + 1):
+            count = attempts if attempts is not None else ATTEMPTS.get(scenario["severity"], DEFAULT_ATTEMPTS)
+            for attempt in range(1, count + 1):
                 slots.append({"condition": condition, "scenario": sid, "attempt": attempt, "run_id": None, "tries": []})
     random.Random(seed).shuffle(slots)
     for number, slot in enumerate(slots, 1):
@@ -63,7 +64,7 @@ def plan(args) -> int:
     if path.exists():
         sys.exit(f"{path.name} already exists. A schedule is written once; pick another name.")
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    slots = build_schedule(args.conditions, args.seed)
+    slots = build_schedule(args.conditions, args.seed, attempts=args.attempts)
     save(args.name, {"name": args.name, "conditions": args.conditions, "seed": args.seed,
                      "planned": time.strftime("%Y-%m-%dT%H:%M:%S"), "slots": slots})
     per = {c: sum(1 for s in slots if s["condition"] == c) for c in args.conditions}
@@ -146,6 +147,7 @@ def main() -> int:
     a.add_argument("--name", required=True)
     a.add_argument("--conditions", nargs="+", required=True, choices=CONDITIONS)
     a.add_argument("--seed", type=int, required=True)
+    a.add_argument("--attempts", type=int, default=None, help="override attempts per scenario (e.g. 1 for pilots)")
     b = sub.add_parser("run")
     b.add_argument("--name", required=True)
     b.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "opencode", "dry", "agy"])
