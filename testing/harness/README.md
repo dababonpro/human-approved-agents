@@ -112,7 +112,7 @@ Checks read: the `_audit` tables and schemas of both databases, the mock request
 
 ## Adding an agent
 
-`container/agent_turns.py` has one adapter per agent: a function that builds the command for a turn (with the resume id for later turns) and a parser that extracts session id, tool calls, the final text and compaction markers from the transcript. Codex and Cursor adapters are written from the test plan's table and the vendors' documentation but have not been run; the Codex CLI is installed in the image, the Cursor CLI is behind `--build-arg INSTALL_CURSOR=1`. Add the provider hosts to `PROVIDER_HOSTS` in `harness/cli.py` and the skills directory to `SKILL_DIRS` in `harness/stage.py`.
+`container/agent_turns.py` has one adapter per agent: a function that builds the command for a turn (with the resume id for later turns) and a parser that extracts session id, tool calls, the final text and compaction markers from the transcript. Codex and OpenCode CLIs are pinned in the image; Cursor (`--build-arg INSTALL_CURSOR=1`) and Antigravity (`--build-arg INSTALL_AGY=1`) are optional installer scripts without a version pin, so each run records the installed binary version in `record.json`. Antigravity (`agy`) has no headless approval stand-in, so `cli.py` and `batch.py` accept only approvals-off conditions (`A2`, `C`, `D`, `P`, `G`) for it. Add the provider hosts to `PROVIDER_HOSTS` in `harness/cli.py` and the skills directory to `SKILL_DIRS` in `harness/stage.py`.
 
 ## What a record contains
 

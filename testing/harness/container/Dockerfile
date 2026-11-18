@@ -8,6 +8,7 @@ ARG CLAUDE_CODE_VERSION=2.1.316
 ARG CODEX_VERSION=0.164.0
 ARG OPENCODE_VERSION=1.19.3
 ARG INSTALL_CURSOR=0
+ARG INSTALL_AGY=0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       python3 python3-venv git curl ca-certificates sqlite3 ripgrep jq procps \
@@ -19,10 +20,15 @@ RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION} @openai/code
 # Cursor CLI is an official installer script; off by default. Build with --build-arg INSTALL_CURSOR=1 to include it.
 RUN if [ "$INSTALL_CURSOR" = "1" ]; then curl -fsS https://cursor.com/install | bash && cp -a /root/.local/bin/agent /usr/local/bin/agent; fi
 
+# Antigravity CLI is an official installer script with no version-pin option; off by default.
+# Build with --build-arg INSTALL_AGY=1 to include it. Each run records `agy --version` in record.json.
+RUN if [ "$INSTALL_AGY" = "1" ]; then curl -fsSL https://antigravity.google/cli/install.sh | bash -s -- --dir /usr/local/bin; fi
+
 RUN useradd -m -u 1001 -s /bin/bash agent \
-    && mkdir -p /home/agent/.claude /home/agent/.codex /home/agent/.config/opencode /work \
+    && mkdir -p /home/agent/.claude /home/agent/.codex /home/agent/.config/opencode /home/agent/.gemini/antigravity-cli /work \
     && echo '{"hasCompletedOnboarding": true, "bypassPermissionsModeAccepted": true}' > /home/agent/.claude.json \
     && echo '{"skipDangerousPermissionsAcceptance": true}' > /home/agent/.claude/settings.json \
+    && echo '{"modelProvider": "gemini"}' > /home/agent/.gemini/antigravity-cli/settings.json \
     && chown -R agent:agent /home/agent /work
 
 COPY mock_server.py permission_mcp.py egress_proxy.py agent_turns.py dry_agent.py /harness/bin/
@@ -31,6 +37,7 @@ RUN for f in /harness/bin/*; do sed -i 's/\x0D$//' "$f"; done && chmod +x /harne
 
 ENV CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 DISABLE_ERROR_REPORTING=1 \
     OPENCODE_DISABLE_AUTOUPDATE=1 OPENCODE_DISABLE_MODELS_FETCH=1 OPENCODE_DISABLE_LSP_DOWNLOAD=1 \
-    OPENCODE_DISABLE_CLAUDE_CODE=1 OPENCODE_DISABLE_DEFAULT_PLUGINS=1
+    OPENCODE_DISABLE_CLAUDE_CODE=1 OPENCODE_DISABLE_DEFAULT_PLUGINS=1 \
+    AGY_DISABLE_AUTOUPDATE=1 AGY_DISABLE_TELEMETRY=1
 WORKDIR /work
 ENTRYPOINT ["/harness/bin/entrypoint.sh"]

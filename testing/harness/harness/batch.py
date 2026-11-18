@@ -30,13 +30,16 @@ def batch_file(name: str):
     return RESULTS_DIR / f"batch-{name}.json"
 
 
-def build_schedule(conditions: list[str], seed: int) -> list[dict]:
+def build_schedule(conditions: list[str], seed: int, attempts: int | None = None) -> list[dict]:
+    if attempts is not None and attempts <= 0:
+        raise ValueError("attempts must be a positive integer")
     slots = []
     for condition in conditions:
         for sid, scenario in SCENARIOS.items():
             if scenario.get("conditions") and condition not in scenario["conditions"]:
                 continue
-            for attempt in range(1, ATTEMPTS.get(scenario["severity"], DEFAULT_ATTEMPTS) + 1):
+            count = attempts if attempts is not None else ATTEMPTS.get(scenario["severity"], DEFAULT_ATTEMPTS)
+            for attempt in range(1, count + 1):
                 slots.append({"condition": condition, "scenario": sid, "attempt": attempt, "run_id": None, "tries": []})
     random.Random(seed).shuffle(slots)
     for number, slot in enumerate(slots, 1):
@@ -59,13 +62,18 @@ def save(name: str, batch: dict) -> None:
 
 
 def plan(args) -> int:
+    if args.attempts is not None and args.attempts <= 0:
+        sys.exit("--attempts must be a positive integer")
     path = batch_file(args.name)
     if path.exists():
         sys.exit(f"{path.name} already exists. A schedule is written once; pick another name.")
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    slots = build_schedule(args.conditions, args.seed)
-    save(args.name, {"name": args.name, "conditions": args.conditions, "seed": args.seed,
-                     "planned": time.strftime("%Y-%m-%dT%H:%M:%S"), "slots": slots})
+    slots = build_schedule(args.conditions, args.seed, attempts=args.attempts)
+    data = {"name": args.name, "conditions": args.conditions, "seed": args.seed,
+            "planned": time.strftime("%Y-%m-%dT%H:%M:%S"), "slots": slots}
+    if args.attempts is not None:
+        data["attempts"] = args.attempts
+    save(args.name, data)
     per = {c: sum(1 for s in slots if s["condition"] == c) for c in args.conditions}
     print(f"planned {len(slots)} attempts: {per}")
     return 0
@@ -90,6 +98,10 @@ def attempt(slot: dict, args) -> tuple[str | None, dict | None]:
 def run(args) -> int:
     batch = load(args.name)
     open_slots = [s for s in batch["slots"] if not s["run_id"]]
+    if args.agent == "agy":
+        unsupported = sorted({s["condition"] for s in open_slots if s["condition"] in ("A", "B")})
+        if unsupported:
+            sys.exit(f"agy has no headless approval stand-in for conditions {', '.join(unsupported)}; use A2, C, D, P or G")
     if args.limit:
         open_slots = open_slots[:args.limit]
     print(f"{len(open_slots)} slot(s) to run of {len(batch['slots'])}", flush=True)
@@ -146,9 +158,10 @@ def main() -> int:
     a.add_argument("--name", required=True)
     a.add_argument("--conditions", nargs="+", required=True, choices=CONDITIONS)
     a.add_argument("--seed", type=int, required=True)
+    a.add_argument("--attempts", type=int, default=None, help="override attempts per scenario (e.g. 1 for pilots)")
     b = sub.add_parser("run")
     b.add_argument("--name", required=True)
-    b.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "opencode", "dry"])
+    b.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "opencode", "dry", "agy"])
     b.add_argument("--model", default=None)
     b.add_argument("--limit", type=int, default=0, help="stop after this many slots")
     c = sub.add_parser("status")

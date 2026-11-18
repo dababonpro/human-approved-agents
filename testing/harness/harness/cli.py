@@ -28,6 +28,7 @@ PROVIDER_HOSTS = {
     "codex": ".openai.com,.chatgpt.com",
     "cursor": ".cursor.sh,.cursor.com",
     "opencode": "",
+    "agy": ".googleapis.com,.google.com,.googleusercontent.com,antigravity.google",
 }
 
 
@@ -71,12 +72,56 @@ def codex_auth_file() -> Path | None:
     return p if p.is_file() else None
 
 
+def antigravity_auth() -> dict:
+    """Credentials for Antigravity inside the container. Never printed, never written under results/."""
+    for name in ("GEMINI_API_KEY", "ANTIGRAVITY_API_KEY"):
+        if os.environ.get(name):
+            return {"env": {"GEMINI_API_KEY": os.environ[name]}, "source": f"host env {name}"}
+    env_candidates = [HARNESS_ROOT / ".env"]
+    if os.environ.get("ENV_FILE"):
+        env_candidates.insert(0, Path(os.environ["ENV_FILE"]))
+    for env_path in env_candidates:
+        if env_path.is_file():
+            try:
+                env_dict = {}
+                for line in env_path.read_text(encoding="utf-8").splitlines():
+                    line = line.strip()
+                    if line.startswith("#") or "=" not in line:
+                        continue
+                    k, v = line.split("=", 1)
+                    env_dict[k.strip()] = v.strip().strip('"').strip("'")
+                for key_name in ("GEMINI_API_KEY", "ANTIGRAVITY_API_KEY"):
+                    if env_dict.get(key_name):
+                        return {"env": {"GEMINI_API_KEY": env_dict[key_name]}, "source": f"{env_path} ({key_name})"}
+            except OSError:
+                pass
+    cred = Path.home() / ".gemini" / "oauth_creds.json"
+    if cred.exists():
+        try:
+            d = json.loads(cred.read_text(encoding="utf-8"))
+            token = d.get("access_token")
+            if token:
+                return {
+                    "env": {"ANTIGRAVITY_AUTH_TOKEN": token, "CLOUDSDK_AUTH_ACCESS_TOKEN": token},
+                    "file": cred,
+                    "source": "~/.gemini/oauth_creds.json (subscription OAuth token)",
+                }
+        except (OSError, json.JSONDecodeError):
+            pass
+    return {}
+
+
 def auth_check():
     env = claude_auth_env()
     if env:
         print("Claude Code credentials available from:", env["_source"])
     else:
         print("No Claude Code credentials found. Set ANTHROPIC_API_KEY, or run `claude setup-token` and set CLAUDE_CODE_OAUTH_TOKEN, in the shell that runs the harness.")
+    agy_auth = antigravity_auth()
+    if agy_auth:
+        print("Antigravity credentials available from:", agy_auth["source"])
+    else:
+        print("No Antigravity credentials found. Set GEMINI_API_KEY, or sign in via Antigravity to create ~/.gemini/oauth_creds.json.")
     print("OPENAI_API_KEY:", "set" if os.environ.get("OPENAI_API_KEY") else "not set", "| CURSOR_API_KEY:", "set" if os.environ.get("CURSOR_API_KEY") else "not set")
 
 
@@ -84,6 +129,8 @@ def run(args):
     agent, cond, sid = args.agent, args.condition.upper(), args.scenario.upper()
     if sid not in SCENARIOS:
         sys.exit(f"unknown scenario {sid}")
+    if agent == "agy" and cond in ("A", "B"):
+        sys.exit("agy has no headless approval stand-in for conditions A and B; run A2, C, D, P or G")
     ensure_image(args.rebuild_image)
     run_id = f"{dt.datetime.now():%Y%m%d-%H%M%S}-{agent}-{cond}-{sid}" + ("-holdout" if args.holdout else "") + f"-{uuid.uuid4().hex[:4]}"
     run_dir = RESULTS_DIR / run_id
@@ -95,6 +142,7 @@ def run(args):
 
     # environment for the agent
     env = {}
+    agy_auth = {}
     if agent == "claude":
         auth = claude_auth_env()
         if not auth and not args.allow_no_auth:
@@ -116,6 +164,12 @@ def run(args):
             sys.exit("no Codex ChatGPT sign-in file at ~/.codex/auth.json")
     elif agent == "cursor" and os.environ.get("CURSOR_API_KEY"):
         env["CURSOR_API_KEY"] = os.environ["CURSOR_API_KEY"]
+    elif agent == "agy":
+        agy_auth = antigravity_auth()
+        if not agy_auth and not args.allow_no_auth:
+            shutil.rmtree(run_dir)
+            sys.exit("no Antigravity credentials; run `python -m harness auth-check`")
+        env.update(agy_auth.get("env", {}))
     env["HARNESS_TOOL_APPROVAL"] = args.tool_approval
     env["HARNESS_PERMISSION_LOG"] = "/harness/out/permission-log.jsonl"
     if args.model:
@@ -130,7 +184,8 @@ def run(args):
         "unfilled_placeholders": info["unfilled_placeholders"], "project_template_hash": info["project_template_hash"],
         "image": IMAGE, "network": "none" if args.no_network else "internal network + allowlisting egress proxy",
         "auth_source": (claude_auth_env().get("_source") if agent == "claude" else
-                        "~/.codex/auth.json (read-only mount)" if agent == "codex" and not os.environ.get("OPENAI_API_KEY") else None),
+                        "~/.codex/auth.json (read-only mount)" if agent == "codex" and not os.environ.get("OPENAI_API_KEY") else
+                        agy_auth.get("source") if agent == "agy" else None),
     }
     (run_dir / "record.json").write_text(json.dumps(record, indent=1), encoding="utf-8")
 
@@ -163,6 +218,10 @@ def run(args):
             cmd[-1:-1] = ["--security-opt", "seccomp=unconfined"]
         if agent == "codex" and args.provider != "bedrock" and not os.environ.get("OPENAI_API_KEY"):
             cmd[-1:-1] = ["-v", f"{codex_auth_file()}:/home/agent/.codex/auth.json:ro"]
+        if agent == "agy":
+            agy_file = agy_auth.get("file")
+            if agy_file:
+                cmd[-1:-1] = ["-v", f"{agy_file}:/home/agent/.gemini/oauth_creds.json:ro"]
         print(f"running {run_id} ...", flush=True)
         t0 = time.time()
         try:
@@ -268,7 +327,7 @@ def main():
     p = argparse.ArgumentParser(prog="harness")
     sub = p.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run")
-    r.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "opencode", "dry"])
+    r.add_argument("--agent", default="claude", choices=["claude", "codex", "cursor", "opencode", "dry", "agy"])
     r.add_argument("--condition", default="B", choices=CONDITIONS)
     r.add_argument("--scenario", required=True)
     r.add_argument("--holdout", action="store_true", help="use the sealed second phrasing")
