@@ -222,8 +222,13 @@ def opencode_cmd(prompt, scenario, session_id):
     # answering "allow" in A and B, so every condition uses it. Its prompts are not logged one by one.
     model = scenario.get("model") or "openai.gpt-oss-20b"
     region = os.environ.get("AWS_REGION", "us-west-2")
-    conf = Path(os.environ["HOME"]) / ".config" / "opencode" / "opencode.json"
+    home = Path(os.environ["HOME"])
+    conf = home / ".config" / "opencode" / "opencode.json"
+    # Every folder the root runner creates under the agent's home is handed to the agent, not only the last one.
+    created = [p for p in (conf.parent, conf.parent.parent) if not p.exists()]
     conf.parent.mkdir(parents=True, exist_ok=True)
+    for folder in reversed(created):
+        give_to_agent(folder)
     conf.write_text(json.dumps({
         "$schema": "https://opencode.ai/config.json", "autoupdate": False, "share": "disabled",
         "provider": {"bedrock": {"npm": "@ai-sdk/openai-compatible", "name": "Amazon Bedrock",
