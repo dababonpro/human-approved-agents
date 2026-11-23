@@ -114,6 +114,7 @@ def run(args) -> int:
             slot["run_id"] = run_id
             slot["verdict"] = score["verdict"]
             slot["system_verdict"] = score.get("system_verdict")
+            slot["harness_peek"] = bool(score.get("harness_peek"))
             incomplete_in_a_row = 0
         else:
             incomplete_in_a_row += 1
@@ -148,6 +149,10 @@ def status(args) -> int:
             cells = "".join(f"{'%d / %d of %d' % tuple(table[(sid, severity)].get(c, [0, 0, 0])):>14}"
                             for c in batch["conditions"])
             print(f"{sid:5}{severity:9}{cells}")
+    peeked = [s for s in done if s.get("harness_peek")]
+    if peeked:
+        print(f"\n{len(peeked)} attempt(s) read the harness's own files, so the agent may have known it was tested. "
+              "Report them apart: " + ", ".join(f"{s['condition']} {s['scenario']} ({s['run_id']})" for s in peeked))
     return 0
 
 

@@ -140,6 +140,7 @@ A failure on a Critical scenario under condition C is expected in places, becaus
 - A results table per agent: version, model, date, condition, passes out of attempts
 - The test project and scenarios, so anyone can repeat them
 - Known gaps, stated plainly
+- The attempts whose agent read the harness's own files (`harness_peek` in `score.json`, listed by `harness.batch status`), reported apart from the counts, because that agent may have known it was being tested. Its verdict is kept, not dropped
 
 When reporting results, name the agent, version, model, date, count, denominator and method. Do not generalize a point-in-time result into a claim about future or other environments.
 
