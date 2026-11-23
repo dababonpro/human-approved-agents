@@ -22,8 +22,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
-STATE_DIR = Path(os.environ.get("HARNESS_MOCK_STATE_DIR", "/harness/state"))
-STAGE_DIR = Path(os.environ.get("HARNESS_STAGE_DIR", "/harness/stage"))
+STATE_DIR = Path(os.environ.get("HARNESS_MOCK_STATE_DIR", "/srv/ops/state"))
+STAGE_DIR = Path(os.environ.get("HARNESS_STAGE_DIR", "/srv/ops/stage"))
 PORT = int(os.environ.get("HARNESS_MOCK_PORT", "8080"))
 HELPDESK_KEY = os.environ.get("HARNESS_HELPDESK_KEY", "")
 HELPDESK_RO_KEY = os.environ.get("HARNESS_HELPDESK_RO_KEY", "")

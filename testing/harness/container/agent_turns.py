@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Run one attempt's turns against one agent, inside the container, as the
-unprivileged user. Reads /harness/stage/scenario.json, writes per-turn
-transcripts and turns.json to /harness/out.
+"""Run one attempt's turns against one agent, inside the container. Installed
+as /srv/ops/bin/runner.py and run as root; each agent CLI runs as the
+unprivileged user through setpriv, with child_env(), so the agent cannot read
+/srv/ops or see the harness's own variables. Reads /srv/ops/stage/scenario.json,
+writes per-turn transcripts and turns.json to /srv/ops/out.
 
 Agents: claude (Claude Code), codex (OpenAI Codex CLI), cursor (Cursor CLI),
 opencode (OpenCode), agy (Antigravity CLI, approvals-off conditions only).
@@ -15,10 +17,37 @@ import sys
 import time
 from pathlib import Path
 
-STAGE = Path(os.environ.get("HARNESS_STAGE_DIR", "/harness/stage"))
-OUT = Path(os.environ.get("HARNESS_OUT_DIR", "/harness/out"))
+STAGE = Path(os.environ.get("HARNESS_STAGE_DIR", "/srv/ops/stage"))
+OUT = Path(os.environ.get("HARNESS_OUT_DIR", "/srv/ops/out"))
 PROJECT = Path(os.environ.get("HARNESS_PROJECT_DIR", "/work/project"))
-MCP_CONFIG = {"mcpServers": {"harness": {"command": "python3", "args": ["/harness/bin/permission_mcp.py"]}}}
+MCP_CONFIG = {"mcpServers": {"approvals": {"command": "python3", "args": ["/usr/local/lib/approvals/approvals_mcp.py"]}}}
+AGENT_USER = os.environ.get("AGENT_USER", "agent")
+APPROVAL_LOG_DEFAULT = "/var/log/approvals/permission-log.jsonl"
+
+
+def child_env(base=None) -> dict:
+    """The environment an agent CLI starts with: the runner's own, minus every HARNESS_* name.
+    The approval stand-in gets its policy and log path under neutral names."""
+    base = dict(os.environ if base is None else base)
+    env = {k: v for k, v in base.items() if not k.startswith("HARNESS_")}
+    env["APPROVAL_POLICY"] = base.get("HARNESS_TOOL_APPROVAL", "allow")
+    env["APPROVAL_LOG"] = base.get("HARNESS_PERMISSION_LOG", APPROVAL_LOG_DEFAULT)
+    env["HOME"] = f"/home/{AGENT_USER}"
+    env["USER"] = env["LOGNAME"] = AGENT_USER
+    return env
+
+
+def as_agent(cmd: list) -> list:
+    """Run cmd as the agent user when the runner is root (in the container); as is otherwise."""
+    if hasattr(os, "geteuid") and os.geteuid() == 0:
+        return ["setpriv", f"--reuid={AGENT_USER}", f"--regid={AGENT_USER}", "--init-groups", "--"] + list(cmd)
+    return list(cmd)
+
+
+def give_to_agent(path: Path) -> None:
+    """Files the root runner writes into the agent's home must stay the agent's."""
+    if hasattr(os, "geteuid") and os.geteuid() == 0:
+        shutil.chown(path, user=AGENT_USER, group=AGENT_USER)
 
 
 def utc():
@@ -48,7 +77,7 @@ def claude_cmd(prompt, scenario, session_id):
     if cond in APPROVALS_OFF:
         cmd += ["--dangerously-skip-permissions"]
     else:
-        cmd += ["--permission-prompt-tool", "mcp__harness__approve",
+        cmd += ["--permission-prompt-tool", "mcp__approvals__approve",
                 "--mcp-config", json.dumps(MCP_CONFIG), "--strict-mcp-config"]
     if scenario.get("max_turns"):
         cmd += ["--max-turns", str(scenario["max_turns"])]
@@ -95,7 +124,7 @@ def claude_parse(path):
 def dry_cmd(prompt, scenario, session_id):
     if session_id:
         os.environ["DRY_SESSION"] = session_id
-    return ["python3", "/harness/bin/dry_agent.py", "-p", prompt]
+    return ["python3", "/usr/local/lib/dry-agent/dry_agent.py", "-p", prompt]
 
 
 # ---------------- Codex CLI (OpenAI, or Bedrock with HARNESS_CODEX_PROVIDER=bedrock) ----------------
@@ -193,8 +222,13 @@ def opencode_cmd(prompt, scenario, session_id):
     # answering "allow" in A and B, so every condition uses it. Its prompts are not logged one by one.
     model = scenario.get("model") or "openai.gpt-oss-20b"
     region = os.environ.get("AWS_REGION", "us-west-2")
-    conf = Path(os.environ["HOME"]) / ".config" / "opencode" / "opencode.json"
+    home = Path(os.environ["HOME"])
+    conf = home / ".config" / "opencode" / "opencode.json"
+    # Every folder the root runner creates under the agent's home is handed to the agent, not only the last one.
+    created = [p for p in (conf.parent, conf.parent.parent) if not p.exists()]
     conf.parent.mkdir(parents=True, exist_ok=True)
+    for folder in reversed(created):
+        give_to_agent(folder)
     conf.write_text(json.dumps({
         "$schema": "https://opencode.ai/config.json", "autoupdate": False, "share": "disabled",
         "provider": {"bedrock": {"npm": "@ai-sdk/openai-compatible", "name": "Amazon Bedrock",
@@ -202,6 +236,8 @@ def opencode_cmd(prompt, scenario, session_id):
                                              "apiKey": "{env:AWS_BEARER_TOKEN_BEDROCK}"},
                                  "models": {model: {"name": model}}}},
     }), encoding="utf-8")
+    give_to_agent(conf.parent)
+    give_to_agent(conf)
     cmd = ["opencode", "run", "--format", "json", "--pure", "--auto", "--dir", str(PROJECT), "-m", f"bedrock/{model}"]
     if session_id:
         cmd += ["-s", session_id]
@@ -403,7 +439,7 @@ def main():
         t0 = time.time()
         with transcript.open("w", encoding="utf-8") as f, (OUT / f"turn-{i}.stderr.txt").open("w", encoding="utf-8") as err:
             try:
-                proc = subprocess.run(cmd, cwd=PROJECT, stdout=f, stderr=err, timeout=timeout)
+                proc = subprocess.run(as_agent(cmd), cwd=PROJECT, stdout=f, stderr=err, timeout=timeout, env=child_env())
                 code = proc.returncode
                 timed_out = False
             except subprocess.TimeoutExpired:

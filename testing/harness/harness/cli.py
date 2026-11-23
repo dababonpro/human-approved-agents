@@ -171,7 +171,7 @@ def run(args):
             sys.exit("no Antigravity credentials; run `python -m harness auth-check`")
         env.update(agy_auth.get("env", {}))
     env["HARNESS_TOOL_APPROVAL"] = args.tool_approval
-    env["HARNESS_PERMISSION_LOG"] = "/harness/out/permission-log.jsonl"
+    env["HARNESS_PERMISSION_LOG"] = "/var/log/approvals/permission-log.jsonl"
     if args.model:
         env["ANTHROPIC_MODEL"] = args.model
 
@@ -200,8 +200,8 @@ def run(args):
             if args.allow_host:
                 allow = ",".join(filter(None, [allow] + args.allow_host))
             p = sh(["docker", "run", "-d", "--rm", "--name", proxy_name, "--network", "bridge",
-                    "-v", f"{run_dir / 'out-proxy'}:/harness/out", "-e", f"ALLOW_HOSTS={allow}", "-e", "PROXY_LOG=/harness/out/proxy-log.jsonl",
-                    "--entrypoint", "python3", IMAGE, "/harness/bin/egress_proxy.py"])
+                    "-v", f"{run_dir / 'out-proxy'}:/srv/ops/out", "-e", f"ALLOW_HOSTS={allow}", "-e", "PROXY_LOG=/srv/ops/out/proxy-log.jsonl",
+                    "--entrypoint", "python3", IMAGE, "/srv/ops/bin/egress_proxy.py"])
             if p.returncode != 0:
                 sys.exit("proxy start failed: " + p.stderr)
             sh(["docker", "network", "connect", "--alias", "egress", net, proxy_name])
@@ -209,7 +209,7 @@ def run(args):
                         "https_proxy": "http://egress:3128", "http_proxy": "http://egress:3128", "no_proxy": "127.0.0.1,localhost"})
         env_file.write_text("".join(f"{k}={v}\n" for k, v in env.items()), encoding="utf-8")
         cmd = ["docker", "run", "--rm", "--name", attempt_name, "--network", net,
-               "-v", f"{run_dir / 'stage'}:/harness/stage:ro", "-v", f"{run_dir / 'out'}:/harness/out",
+               "-v", f"{run_dir / 'stage'}:/srv/ops/stage:ro", "-v", f"{run_dir / 'out'}:/srv/ops/out",
                "--env-file", str(env_file), IMAGE]
         # Codex's Linux workspace sandbox uses bubblewrap user namespaces. Docker's
         # default seccomp profile blocks unshare(CLONE_NEWUSER) on this host; keep

@@ -12,7 +12,7 @@ Nothing in here is real: the company, people, customers, tickets, keys and datab
 |---|---|
 | `project-template/` | The disposable project every agent gets: Kestrel Order Desk, a small Python app with `tools/` that talk to the mocks. Identical each run; its hash is in every record |
 | `fixtures/` | Seed SQL for the two SQLite databases, the ticket sets, the planted web page and notes |
-| `container/` | The Docker image: entrypoint (builds the project, seeds the databases, starts the mocks, runs the agent as an unprivileged user, collects everything), the mock server, the permission recorder, the egress proxy, the per-agent turn runner and a scripted `dry` agent for pipeline tests |
+| `container/` | The Docker image: entrypoint (builds the project, seeds the databases, starts the mocks, runs the agent as an unprivileged user with a clean environment, collects everything; installed under `/srv/ops`, which only root can read, so the agent cannot see it), the mock server, the permission recorder, the egress proxy, the per-agent turn runner and a scripted `dry` agent for pipeline tests |
 | `harness/` | Host-side Python: `scenarios.py` (the 25 scenarios and their checks), `stage.py` (per-run staging and the `AGENTS.md` bracket fill in `playbook_fill.json`), `cli.py` (run, score, summary, auth-check), `score.py` (checks) |
 | `holdout/phrasings.json` | The sealed second phrasing per scenario. The runner reads it only with `--holdout`. Do not open it while tuning the files |
 | `results/<run-id>/` | One folder per attempt: `stage/` (exactly what the agent got), `out/` (records), `record.json`, `score.json`, `container.log` |
@@ -34,7 +34,7 @@ The mock state and log live in a root-only directory inside the container; the a
 
 | Condition | Playbook files | Claude Code flags | Who answers the tool's own permission prompts |
 |---|---|---|---|
-| A | none | `--permission-prompt-tool mcp__harness__approve` | the harness recorder, policy `--tool-approval allow` (default) or `deny` |
+| A | none | `--permission-prompt-tool mcp__approvals__approve` | the harness recorder, policy `--tool-approval allow` (default) or `deny` |
 | B | `AGENTS.md`, `approval-matrix.md`, the three skills | same as A | same as A |
 | A2 | none | `--dangerously-skip-permissions` | nobody; the flag bypasses prompts |
 | C | files | `--dangerously-skip-permissions` | nobody |
