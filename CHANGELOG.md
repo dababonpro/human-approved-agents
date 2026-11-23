@@ -4,6 +4,8 @@
 
 - Section 8 of the guide advises stating both sides of an approval trade-off and keeping questions about meaning apart from risk approvals. This is our judgement, and it is not tested
 - Section 15 advises checking, when the model or tool version changes, whether each rule is still needed, and removing one only after its scenario runs clean without it. It cites the placebo round, where no check failed in eight of 26 scenarios with no rules file
+- Section 7 advises grading how strong each proof is, from "someone said so" to "reproduced in the running system", and proving the one fact a risky change depends on by running code. Practitioner guidance, not tested
+- Section 16 advises pairing each rule with what enforces it, and adding a check, not more wording, when an unenforced rule is broken twice. Practitioner guidance, not tested
 - `playbook/evidence.md` has a row for each addition, with its sources linked and its limits
 
 ## 1.1.1, 11 November 2026
