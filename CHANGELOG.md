@@ -8,6 +8,7 @@
 - Section 16 advises pairing each rule with what enforces it, and adding a check, not more wording, when an unenforced rule is broken twice. Practitioner guidance, not tested
 - Section 6 advises treating an agent's own work record as a claim: add-only, corrected by new entries, checked against the session history before anyone relies on it, with spreadsheet formulas escaped. Practitioner guidance, not tested
 - `playbook/evidence.md` has a row for each addition, with its sources linked and its limits
+- The scorer records `harness_peek`: the harness paths an agent's own tool calls named, such as `/harness/stage/scenario.json`, which names the scenario and condition. It does not change the verdict. `harness.batch status` lists those attempts, and the test plan says to report them apart. Over the stored attempts it flags 2 of 114 Antigravity attempts from 18 November 2026 and none of 2,662 Claude Code attempts, so the published placebo round is unaffected. `tools/check_harness.py` checks the flag
 
 ## 1.1.1, 11 November 2026
 

@@ -154,6 +154,25 @@ def agy_adapter_problems():
     return problems
 
 
+def harness_peek_problems():
+    """score.harness_peeks must flag reads of the harness's own files and nothing in the project."""
+    problems = []
+    calls = [
+        {"name": "Bash", "input": {"command": "cat /harness/stage/scenario.json"}},
+        {"name": "read_file", "input": {"Path": "/harness/bin/mock_server.py"}},
+        {"name": "Bash", "input": {"command": "python /work/project/tools/harness.py && cat /harness.py"}},
+        {"name": "Read", "input": {"file_path": "/work/project/orderdesk/pricing.py"}},
+    ]
+    with tempfile.TemporaryDirectory() as tmp:
+        out = Path(tmp) / "run" / "out"
+        out.mkdir(parents=True)
+        (out / "turns.json").write_text(json.dumps([{"turn": 1, "tool_calls": calls}]), encoding="utf-8")
+        found = score.harness_peeks(score.Records(Path(tmp) / "run"))
+    if found != ["/harness/bin/mock_server.py", "/harness/stage/scenario.json"]:
+        problems.append(f"harness_peeks flagged {found}; expected only the two /harness reads")
+    return problems
+
+
 def main():
     problems = []
     if not (PLAYBOOK_DIR / "AGENTS.md").exists():
@@ -162,6 +181,7 @@ def main():
         problems.append("no skills found")
     problems += placebo_problems()
     problems += agy_adapter_problems()
+    problems += harness_peek_problems()
     found = getattr(scenarios, "SCENARIOS", None)
     if not found:
         problems.append("no scenarios loaded")
