@@ -203,6 +203,8 @@ Build the check into the work:
 - Compare counts on both sides of a data move.
 - When an agent says it could not verify something, treat the work as unverified.
 
+Ask how strong each proof is. A claim can rest on five kinds of evidence, weakest first: someone said so; they pointed at a line of code; they walked through the failing case and showed it cannot happen; they ran a test or script against the real code that fails loudly if the claim is wrong; they reproduced it in the running system. Treat only the last two as checked. When a small change looks risky, ask which one fact makes it safe, and ask for that fact to be shown by running code. This scale comes from one practitioner's published agent skills, and it has not been tested.
+
 Reward the agent for saying "I could not confirm this". An honest gap costs a minute, and a false "done" can cost a week.
 
 | Pattern | What it looks like | The fix |
@@ -339,6 +341,8 @@ Two habits make a feature map trustworthy:
 **Guard the tests.** Treat deleting, skipping or editing a test, or weakening the map, as a change a person must approve. Protect tests and the map with required code-owner review. This only works if the agent has its own identity, is not a code owner, and nobody can bypass the rule. Own the `CODEOWNERS` file too. A team of one has no second approver, so such changes wait, as in section 4. Where you cannot set this up, write that down in `approval-matrix.md`. Where you can, keep a few black-box checks outside what the agent can edit.
 
 **Put architecture rules in tools.** Enforce which modules may depend on which with an import or dependency checker. When you keep correcting the same pattern, turn it into a lint rule. Record complexity and duplication today, and flag any change that makes them worse for a person to look at. Do not use them as a hard gate. They are easy to game, and their link to maintainability is unproven.
+
+**Pair each rule with what enforces it.** Keep a short table in your agent rules file: each rule, and the hook, test, lint rule or limit that fails when it is broken, or "nothing" when it needs judgement. When an agent breaks a rule that nothing enforces a second time, add a check rather than rewording the rule. Watch the new check fail on the real mistake before you trust it, as with a feature map proof. This comes from one practitioner's published agent skills, and it has not been tested.
 
 **Keep the worker and the judge apart.** A separate reviewer, human or agent, is easier to make critical than the author is. An agent reviewer still leans generous and needs tuning, so it helps, and it does not replace a person.
 
