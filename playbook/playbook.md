@@ -181,6 +181,8 @@ Log these for every action that changes something, and every read of sensitive d
 
 Keep logs where the agent cannot edit them, and decide how long to keep them. If a law sets a period, that applies. You usually do not need every conversation forever, but keep the agent's plans, tool calls and the sources it read for a short period, or you cannot trace an injected instruction. Mask secrets and personal data. Most agents also keep their own local history of every session, including the full output of every tool they ran, for example Claude Code under `~/.claude/projects`. That history holds any secret or personal data the agent read, so decide how long to keep it, who can read that machine, and whether it is synced or backed up. Your existing tools, such as git history, pull request reviews and ticket comments, may cover much of this.
 
+When an agent keeps its own record of a long task, such as a list of items done or decisions made, treat it as a claim, not a log. Have it add entries and never rewrite them: a wrong entry gets a new one that corrects it, so you can see what was claimed and when. Before you rely on the record, have the agent check each entry from that session against its session history, and correct any entry with no matching action. If the record is a spreadsheet file, have the agent put a `'` before any cell that starts with `=`, `+`, `-` or `@`, so the spreadsheet does not run it as a formula. This comes from one practitioner's published agent skills, and it has not been tested.
+
 A log nobody reads protects no one. Pick two or three signals, decide who sees them and what they do, and set an alert where your tools allow it:
 
 - Repeated failures or denied tool calls
