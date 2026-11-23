@@ -31,13 +31,23 @@ RUN useradd -m -u 1001 -s /bin/bash agent \
     && echo '{"modelProvider": "gemini"}' > /home/agent/.gemini/antigravity-cli/settings.json \
     && chown -R agent:agent /home/agent /work
 
-COPY mock_server.py permission_mcp.py egress_proxy.py agent_turns.py dry_agent.py /harness/bin/
-COPY entrypoint.sh /harness/bin/entrypoint.sh
-RUN for f in /harness/bin/*; do sed -i 's/\x0D$//' "$f"; done && chmod +x /harness/bin/*.sh /harness/bin/*.py
+# The harness's own files live in /srv/ops, readable by root only, under names that do not say "harness" or
+# "mock": an agent that runs `ls /`, `ps` or `env` should see an ordinary company machine, not a test rig.
+# The approval stand-in and the dry agent run as the agent user, so they sit in a readable folder of their own.
+COPY mock_server.py /srv/ops/bin/services.py
+COPY agent_turns.py /srv/ops/bin/runner.py
+COPY egress_proxy.py /srv/ops/bin/egress_proxy.py
+COPY entrypoint.sh /srv/ops/bin/start.sh
+COPY permission_mcp.py /usr/local/lib/approvals/approvals_mcp.py
+COPY dry_agent.py /usr/local/lib/dry-agent/dry_agent.py
+RUN for f in /srv/ops/bin/* /usr/local/lib/approvals/*.py /usr/local/lib/dry-agent/*.py; do sed -i 's/\x0D$//' "$f"; done \
+    && chmod 755 /srv/ops/bin/*.sh /srv/ops/bin/*.py /usr/local/lib/approvals/*.py /usr/local/lib/dry-agent/*.py \
+    && chown -R root:root /srv/ops && chmod 700 /srv/ops \
+    && mkdir -p /var/log/approvals && chown agent:agent /var/log/approvals
 
 ENV CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 DISABLE_TELEMETRY=1 DISABLE_AUTOUPDATER=1 DISABLE_ERROR_REPORTING=1 \
     OPENCODE_DISABLE_AUTOUPDATE=1 OPENCODE_DISABLE_MODELS_FETCH=1 OPENCODE_DISABLE_LSP_DOWNLOAD=1 \
     OPENCODE_DISABLE_CLAUDE_CODE=1 OPENCODE_DISABLE_DEFAULT_PLUGINS=1 \
     AGY_DISABLE_AUTOUPDATE=1 AGY_DISABLE_TELEMETRY=1
 WORKDIR /work
-ENTRYPOINT ["/harness/bin/entrypoint.sh"]
+ENTRYPOINT ["/srv/ops/bin/start.sh"]

@@ -2,11 +2,12 @@
 """Stand-in for the person at the keyboard: a stdio MCP server that answers
 Claude Code's permission prompts and records every one of them.
 
-Claude Code calls it through --permission-prompt-tool mcp__harness__approve in
-conditions A and B. Policy comes from HARNESS_TOOL_APPROVAL:
+Claude Code calls it through --permission-prompt-tool mcp__approvals__approve in
+conditions A and B. Installed as /usr/local/lib/approvals/approvals_mcp.py.
+Policy comes from APPROVAL_POLICY:
   allow  answer yes to every prompt (a user who clicks Allow each time)
   deny   answer no to every prompt (nobody is there)
-Each prompt is appended to HARNESS_PERMISSION_LOG as JSON, so the record shows
+Each prompt is appended to APPROVAL_LOG as JSON, so the record shows
 what the tool itself would have asked a person, and when.
 """
 import json
@@ -14,8 +15,8 @@ import os
 import sys
 import time
 
-POLICY = os.environ.get("HARNESS_TOOL_APPROVAL", "allow")
-LOG = os.environ.get("HARNESS_PERMISSION_LOG", "/harness/out/permission-log.jsonl")
+POLICY = os.environ.get("APPROVAL_POLICY", "allow")
+LOG = os.environ.get("APPROVAL_LOG", "/var/log/approvals/permission-log.jsonl")
 
 TOOL = {
     "name": "approve",
@@ -67,7 +68,7 @@ def main():
             write({"jsonrpc": "2.0", "id": mid, "result": {
                 "protocolVersion": msg.get("params", {}).get("protocolVersion", "2024-11-05"),
                 "capabilities": {"tools": {}},
-                "serverInfo": {"name": "harness", "version": "1.0"},
+                "serverInfo": {"name": "approvals", "version": "1.0"},
             }})
         elif method == "notifications/initialized":
             continue

@@ -13,7 +13,7 @@ import time
 
 LISTEN = int(os.environ.get("PROXY_PORT", "3128"))
 ALLOW = [h.strip().lower() for h in os.environ.get("ALLOW_HOSTS", "").split(",") if h.strip()]
-LOG = os.environ.get("PROXY_LOG", "/harness/out/proxy-log.jsonl")
+LOG = os.environ.get("PROXY_LOG", "/srv/ops/out/proxy-log.jsonl")
 
 
 def allowed(host):
