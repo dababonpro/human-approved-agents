@@ -99,6 +99,19 @@ There is no level above 3 in this playbook. Agents that choose their own work wi
 
 These levels are this playbook's practical vocabulary, informed by similar schemes from AWS and IMDA. No published scheme for agents has been validated by experiment. Treat these levels as a way to discuss oversight, not as a measurement or standard.
 
+Teams that write code with agents often describe themselves with a different scale, which rates the whole team rather than one kind of action. Here is how it lines up with these levels:
+
+| Team scale | What it means | In this playbook |
+|---|---|---|
+| L1 AI-assisted | The agent suggests lines; a person writes the code | Level 0 or 1 |
+| L2 AI-generated | The agent writes whole changes; a person reviews every one | Code changes at level 1, merging at level 2 |
+| L3 AI-reviewed | Automated review and tests run first; a person approves each merge on intent and proof | The same levels, with section 7's checks done before approval |
+| L3.5 Selective auto-merge | Routine changes in services that earned it merge on their own | Merging that kind of change raised to level 3, through section 11 |
+| L4 Mostly autonomous | Agents act inside a defined scope and report afterwards | Out of scope, except a narrow level 3 scope |
+| L5 Dark factory | Specs go in and deployed software comes out, with no person per change | Out of scope |
+
+So this playbook covers teams from L2 to L3.5. Raise one kind of change at a time, never a whole team, and keep changes to authentication, billing, customer data and database migrations at level 2. The scale comes from a vendor's summary of more than a dozen practitioner and vendor sources. It has not been tested either.
+
 Levels 0 and 1 carry less risk, not no risk. A meta-analysis of 18 experiments with non-AI automation suggested that, when a system fails, harm may be more likely once it moves from analysing information to proposing what to do. This is not evidence about AI agents. A reader who trusts a draft and passes it on can still cause harm, so review drafts properly. A wrong answer also causes harm if someone acts on it.
 
 ## 4. Decide What Needs Approval
@@ -280,6 +293,8 @@ Raise a level for one kind of action at a time, when all of these are true:
 | 300 | 1% |
 
 Set the number by the damage one failure would do. Treat this as a floor, because real tasks are not fully independent. Low-volume agents may take months to get there, and that is the correct result. There is no published evidence for any fixed waiting period, so do not use one.
+
+For merging code without approval, two more counts are worth keeping beside the pass rate: how often a person overrides the automated review's verdict, and how often that review flags something that was fine. Some writers propose promoting a service after its last 20 changes show under 10% overrides. Twenty clean outcomes cannot show that: they still leave a failure rate of up to 14% open. Use the table above instead.
 
 Drop a level after a serious incident. Recheck the level after a change of model, tool, access or scope. Run the checklist again and watch closely for a while after any change. Vendors change models, so assume this will happen.
 
